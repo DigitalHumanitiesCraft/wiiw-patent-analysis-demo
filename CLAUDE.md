@@ -3,12 +3,17 @@
 ## Repository Structure
 
 ```
-data/       Raw data and intermediate results
-scripts/    Python and R scripts
-knowledge/  Promptotyping documents (see below)
-plots/      Generated visualizations
-reports/    Final outputs and documentation
+data/         Raw data (RDS files, local only, .gitignore)
+scripts/      Python analysis scripts
+knowledge/    Promptotyping documents (see below)
+docs/         GitHub Pages output (HTML, plots, CSVs)
 ```
+
+**Workflow:**
+1. Python scripts process `data/` locally
+2. Results exported to `docs/`
+3. `docs/` published via GitHub Pages
+4. Raw data never committed (synthetic data only for development)
 
 ## Promptotyping Methodology
 
@@ -32,7 +37,7 @@ The `knowledge/` folder contains the project's knowledge base.
 |----------|---------|
 | `data.md` | Data structure, variables, limitations, quality notes |
 | `research.md` | Domain knowledge, research questions, methodological decisions |
-| `user-story.md` | Requirements formulated from user perspective |
+| `requirements.md` | User stories, acceptance criteria, technology stack |
 | `journal.md` | Process documentation, decisions, dead ends, insights |
 
 Before generating code, read the relevant documents in `knowledge/`. When implementation produces new insights, update the documentation. The documents are the source of truth, code is a disposable artifact.
@@ -45,7 +50,7 @@ Document decisions and findings in `journal.md`.
 
 Update `data.md` when discovering new data characteristics.
 
-Save scripts to `scripts/`, plots to `plots/`, outputs to `reports/`.
+Save scripts to `scripts/`, outputs to `docs/` for GitHub Pages publication.
 
 When uncertain about research context, consult `research.md` or ask.
 

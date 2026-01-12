@@ -18,12 +18,13 @@ python scripts/verify_data.py
 ## Projektstruktur
 
 ```
-data/         RDS-Daten (synthetischer Datensatz)
+data/         RDS-Daten (lokal, .gitignore, synthetischer Datensatz für Entwicklung)
 scripts/      Python-Analyseskripte
 knowledge/    Promptotyping-Dokumentation
-plots/        Visualisierungen (generiert)
-reports/      Ergebnisse und Berichte (generiert)
+docs/         GitHub Pages Output (Visualisierungen, Metriken, HTML)
 ```
+
+**Workflow:** Lokale Python-Verarbeitung (`data/` → `scripts/` → `docs/`) → GitHub Pages Publikation
 
 ## Daten
 
@@ -59,7 +60,8 @@ Details: [knowledge/CLAUDE.md](knowledge/CLAUDE.md)
 | Dokument | Inhalt |
 |----------|--------|
 | [knowledge/data.md](knowledge/data.md) | Datenstruktur, Variablen, Qualität |
-| [knowledge/research.md](knowledge/research.md) | Forschungsfragen, Metriken, Tooling |
+| [knowledge/research.md](knowledge/research.md) | Forschungsfragen, Metriken, Python-Tooling |
+| [knowledge/requirements.md](knowledge/requirements.md) | User Stories, Akzeptanzkriterien, Tech Stack |
 | [knowledge/journal.md](knowledge/journal.md) | Entwicklungsprozess, Entscheidungen, Learnings |
 | [scripts/README.md](scripts/README.md) | Skript-Dokumentation |
 
@@ -72,11 +74,17 @@ Details: [knowledge/CLAUDE.md](knowledge/CLAUDE.md)
 
 ## Technologie-Stack
 
-**Datenverarbeitung:** Python, pandas, pyreadr
+**Python 3.11+**
 
-**Netzwerkanalyse:** NetworkX, igraph (optional für Performance)
+**Datenverarbeitung:** pandas, pyreadr
+
+**Netzwerkanalyse:** NetworkX (Standard), igraph (optional für >100k Knoten)
+
+**Community Detection:** python-louvain, leidenalg (optional)
 
 **Visualisierung:** Matplotlib, Plotly, PyVis
+
+**Publikation:** GitHub Pages (statische HTML, interaktive Plots)
 
 ## Hinweise
 
