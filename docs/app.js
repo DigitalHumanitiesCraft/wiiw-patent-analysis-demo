@@ -404,30 +404,6 @@ function initControls() {
         updateNetwork();
     });
 
-    // Play button
-    let playInterval = null;
-    d3.select('#play-button').on('click', function() {
-        if (playInterval) {
-            clearInterval(playInterval);
-            playInterval = null;
-            this.textContent = 'Play';
-        } else {
-            this.textContent = 'Pause';
-            let yearIndex = 0;
-            playInterval = setInterval(() => {
-                if (yearIndex > 9) {
-                    clearInterval(playInterval);
-                    playInterval = null;
-                    d3.select('#play-button').text('Play');
-                    return;
-                }
-                d3.select('#time-slider').property('value', yearIndex);
-                d3.select('#time-slider').dispatch('input');
-                yearIndex++;
-            }, 500);
-        }
-    });
-
     // Reset button
     d3.select('#reset-button').on('click', () => {
         d3.select('#time-slider').property('value', 9).dispatch('input');

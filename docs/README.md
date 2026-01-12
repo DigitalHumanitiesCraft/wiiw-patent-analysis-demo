@@ -235,6 +235,40 @@ Basierend auf dieser Exploration:
 
 ---
 
+---
+
+## Interaktive Visualisierung
+
+**Frontend:** [index.html](index.html) (GitHub Pages)
+
+Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsnetzwerks mit:
+
+**Features:**
+- **Force-Directed Network** (VIS-1A): 110 Länder, ~5,751 internationale Kooperationen
+  - Node Size = Weighted Degree, Color = Community (Louvain), Zoom/Pan, Drag
+  - Tooltips mit Centrality-Metriken
+  - Ego-Network Highlighting (Click auf Node)
+- **Country Ranking** (VIS-1B): Top-N Bar Chart (10/20/50/All)
+  - 4 Centrality-Metriken wählbar: Degree, Betweenness, Closeness, Eigenvector
+- **Temporal Metrics** (VIS-3A): Small Multiples (2x2 Grid)
+  - Density, Modularity, Num Communities, Avg Clustering (2010-2018)
+- **Time Slider**: Wechsel zwischen Jahren (2010-2018) und kumulativer Ansicht
+- **Edge Weight Filter**: Reduziert Visual Clutter (Schwellenwert 1-14)
+- **Responsive Design**: Desktop/Tablet/Mobile
+
+**Technologie:**
+- d3.js v7 (Force Simulation, Data Join, Scales, Zoom)
+- CSS Grid + Flexbox (70/30 Layout)
+- Vanilla JavaScript (ES6+)
+
+**Datengrundlage:**
+- `data/country_network.json` (7.2 MB, 9 Jahre + kumulativ)
+- Vollständige Netzwerkmetriken (Centrality, Communities, Global Metrics)
+
+**⚠️ Hinweis:** Die Visualisierung basiert auf synthetischen Daten mit bekannten Artefakten (siehe unten). Strukturelle Eigenschaften (hohe Dichte, niedrige Modularity) sind nicht repräsentativ für reale Patent-Netzwerke.
+
+---
+
 ## Kontakt & Dokumentation
 
 **Projektdokumentation:** `knowledge/` Ordner
@@ -242,7 +276,10 @@ Basierend auf dieser Exploration:
 - `research.md` - Forschungsfragen und Methodik
 - `requirements.md` - User Stories und Technologie-Stack
 - `journal.md` - Prozessdokumentation und Learnings
+- `design.md` - InfoVis Design-Spezifikation
 
-**Skript:** `scripts/explore_research_questions.py`
+**Skripte:**
+- `scripts/explore_research_questions.py` - Initiale Exploration
+- `scripts/aggregate_country_network.py` - Länder-Aggregation + Netzwerkmetriken
 
 **Methodik:** Promptotyping (siehe `CLAUDE.md`)

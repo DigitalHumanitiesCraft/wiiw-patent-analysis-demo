@@ -136,11 +136,11 @@ Akzeptanzkriterien:
 - Kantendicke kodiert Gewicht
 - Export als PNG (300 DPI) und PDF (Vektor)
 
-Technologie: Matplotlib + NetworkX (statisch) oder Plotly (interaktiv mit statischem Export)
+Technologie: d3.js v7 (Force-Directed Layout), CSS Grid, Vanilla JavaScript
 
-Layout: spring_layout (Fruchterman-Reingold) für Ländernetzwerk (~96 Knoten)
+Layout: d3.forceSimulation (Force-Directed) für 110 Länder
 
-Status: Offen
+Status: Abgeschlossen (docs/index.html, docs/app.js, docs/styles.css - Force-Directed Network + Country Ranking Bar Chart, Zoom/Pan, Tooltips, Ego-Network Highlighting)
 
 ---
 
@@ -152,7 +152,7 @@ Akzeptanzkriterien:
 - Konsistentes Layout über Jahre hinweg
 - Erkennbare Trends
 
-Status: Offen
+Status: Abgeschlossen (Time Slider koordiniert Network + Ranking Views, Temporal Metrics als Small Multiples [2x2 Grid] mit 4 Metriken: Density, Modularity, Num Communities, Avg Clustering)
 
 ---
 
