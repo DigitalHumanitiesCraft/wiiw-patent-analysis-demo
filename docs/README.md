@@ -14,7 +14,7 @@ Dieser Ordner enthält die Ergebnisse der forschungsfragen-orientierten Explorat
 docs/
 ├── README.md                          (diese Datei - Übersicht)
 ├── data/                              (Aggregierte Netzwerkdaten für Frontend)
-│   └── country_network.json           (7.1 MB, vollständige Länder-Netzwerkdaten + Metriken)
+│   └── country_network.json           (7.2 MB, vollständige Länder-Netzwerkdaten + Metriken, 5,751 Kanten)
 └── exploration/                       (Explorationsergebnisse)
     ├── DATA_DICTIONARY.md             (Vollständige Dokumentation aller Dateien)
     ├── macro/                         (Makroebene: Länderanalysen)
