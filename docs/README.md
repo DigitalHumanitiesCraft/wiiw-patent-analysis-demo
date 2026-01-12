@@ -13,7 +13,6 @@ Dieser Ordner enthält die Ergebnisse der forschungsfragen-orientierten Explorat
 ```
 docs/
 ├── README.md                          (diese Datei - Übersicht)
-├── journal_update.txt                 (Session-Zusammenfassung für knowledge/journal.md)
 └── exploration/                       (Explorationsergebnisse)
     ├── DATA_DICTIONARY.md             (Vollständige Dokumentation aller Dateien)
     ├── macro/                         (Makroebene: Länderanalysen)

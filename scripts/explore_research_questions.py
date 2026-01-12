@@ -520,85 +520,6 @@ print("      - Bridge-Firmen: Klare Kandidaten identifiziert -> gute Basis für 
 print("      - Temporale Entwicklung: Daten zeigen Trends -> lohnt sich für Publikation")
 print()
 
-# ================================================================================
-# 6. JOURNAL-UPDATE GENERIEREN
-# ================================================================================
-
-print("=" * 80)
-print("6. JOURNAL-UPDATE GENERIEREN")
-print("=" * 80)
-print()
-
-journal_update = f"""## 2026-01-12 (Session 3): Forschungsfragen-Exploration
-
-Systematische Exploration der Patentkooperationsdaten im Hinblick auf die Forschungsfragen aus research.md. Skript `explore_research_questions.py` erstellt und ausgeführt.
-
-**Erkenntnisse Makroebene (Länder):**
-- {len(country_totals)} unique Länder identifiziert
-- Top-3 Länder nach Gesamtgewicht: {', '.join(top20_countries.head(3)['country'].tolist())}
-- Stärkste bilaterale Beziehung: {top20_pairs.iloc[0]['country_a']}-{top20_pairs.iloc[0]['country_b']} (Gewicht: {top20_pairs.iloc[0]['total_weight']:.0f})
-- Internationale Kooperationen dominieren durchgängig über alle Jahre (>99%)
-
-**Erkenntnisse Mikroebene (Firmen):**
-- {len(firm_bridge_df):,} unique Firmen identifiziert
-- Top-Bridge-Kandidat: {top20_bridge.iloc[0]['firm_id']} mit {top20_bridge.iloc[0]['num_partner_countries']} verschiedenen Partnerländern
-- Durchschnittliche Anzahl Partnerländer pro Firma: {firm_bridge_df['num_partner_countries'].mean():.2f}
-- Klare Bridge-Kandidaten für Mikroebenen-Forschungsfrage identifiziert
-
-**Temporale Entwicklung:**
-- Zeitraum: {df['year_application'].min()}-{df['year_application'].max()}
-- Netzwerkgröße (Firmen): {network_preview.iloc[0]['firms_nodes']} ({network_preview.iloc[0]['year']}) -> {network_preview.iloc[-1]['firms_nodes']} ({network_preview.iloc[-1]['year']})
-- Trend zeigt Wachstum in Anzahl Kooperationen und Firmen
-
-**Netzwerkstruktur:**
-- Gewichtsverteilung: Rechtsschief, Median={df['weight'].median()}, 95%-Quantil={weight_dist[weight_dist['quantile']=='95%']['weight'].values[0]}
-- Firmennetzwerk-Dichte: ~{network_preview['firms_density'].mean():.6f} (sehr dünn, typisch für große Netzwerke)
-- Ländernetzwerk-Dichte: ~{network_preview['countries_density'].mean():.3f}
-
-**Methodische Empfehlungen:**
-1. Gewichtstransformation: log(weight+1) für Visualisierungen und bestimmte Metriken sinnvoll (rechtsschiefe Verteilung)
-2. Tool-Auswahl: NetworkX ausreichend für Länderebene, igraph für Firmenebene erwägen
-3. Temporale Analyse: Sowohl jährliche Snapshots als auch kumulatives Netzwerk berechnen
-4. Forschungsfragen-Priorisierung: Alle drei Hauptfragen (Makro-Zentralität, Communities, Temporal) haben gute Datenbasis
-
-**Beantwortete offene Fragen aus data.md:**
-- Weight-Verteilung bestätigt: Median=4, Durchschnitt=3.91, Range 1-14, rechtsschief
-- Internationale Dominanz über alle Jahre bestätigt (>99% durchgängig)
-- Netzwerkgrößen pro Jahr dokumentiert für informierte Tool-Entscheidungen
-
-**Exports erstellt:**
-- docs/exploration/macro/country_rankings.csv - Länder-Rankings mit Metriken
-- docs/exploration/macro/country_pairs_top20.csv - Top bilaterale Beziehungen
-- docs/exploration/micro/firm_bridge_candidates.csv - Bridge-Kandidaten
-- docs/exploration/micro/firm_rankings.csv - Firmen-Rankings
-- docs/exploration/temporal/temporal_overview.csv - Zeitreihe Netzwerk-Statistiken
-- docs/exploration/temporal/temporal_top_countries.csv - Top-5 Länder pro Jahr
-- docs/exploration/structure/network_preview.csv - Strukturelle Eigenschaften
-- docs/exploration/structure/weight_distribution.csv - Gewichts-Quantile
-- docs/exploration/DATA_DICTIONARY.md - Vollständige Dokumentation aller Dateien
-
-**Learnings:**
-- Forschungsfragen-orientierte Exploration liefert präzisere Grundlage für methodische Entscheidungen als generische Exploration
-- CSV-Exports in docs/ ermöglichen spätere GitHub Pages Publikation ohne Rohdaten zu teilen
-- Systematische Quantil-Analysen zeigen konkrete Transformationsbedarfe (log für rechtsschiefe Daten)
-- Bridge-Kandidaten-Identifikation bereits vor Netzwerkberechnung möglich (effizient)
-
-**Nächste Schritte:**
-- US-02: Aggregation auf Länderebene implementieren (Grundlage vorhanden)
-- US-03: Netzwerkobjekte erstellen mit NetworkX
-- Entscheidung: Firmenebene vollständig oder Top-N-Subgraph für Performance
-"""
-
-# Journal-Update speichern
-journal_path = Path("docs") / "journal_update.txt"
-with open(journal_path, 'w', encoding='utf-8') as f:
-    f.write(journal_update)
-
-print(f"[OK] Journal-Update generiert: {journal_path}")
-print()
-print("Bitte den Inhalt manuell in knowledge/journal.md einfügen nach Review.")
-print()
-
 print("=" * 80)
 print("EXPLORATION ABGESCHLOSSEN")
 print("=" * 80)
@@ -619,5 +540,4 @@ for csv_file in sorted((output_dir / "temporal").glob("*.csv")):
 print("  - exploration/structure/")
 for csv_file in sorted((output_dir / "structure").glob("*.csv")):
     print(f"    - {csv_file.name}")
-print("  - journal_update.txt")
 print()
