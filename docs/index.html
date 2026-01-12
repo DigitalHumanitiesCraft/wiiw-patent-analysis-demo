@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patent Cooperation Network Analysis (2010-2018)</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header id="header">
+            <h1>Patent Cooperation Network (2010-2018)</h1>
+            <div id="controls">
+                <label>Year: <span id="year-label">Cumulative</span></label>
+                <select id="centrality-selector">
+                    <option value="degree_centrality">Degree Centrality</option>
+                    <option value="betweenness_centrality">Betweenness Centrality</option>
+                    <option value="closeness_centrality">Closeness Centrality</option>
+                    <option value="eigenvector_centrality">Eigenvector Centrality</option>
+                </select>
+            </div>
+            <div id="legend"></div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main id="main-grid">
+            <!-- VIS-1A: Network Overview (70% width) -->
+            <div id="network-view" class="view">
+                <h2>Network Overview</h2>
+                <svg id="network-svg"></svg>
+                <div id="network-controls">
+                    <label>Edge Weight Filter:
+                        <input type="range" id="weight-slider" min="1" max="14" value="1">
+                        <span id="weight-value">1</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <aside id="sidebar">
+                <!-- VIS-1B: Centrality Ranking (30% width) -->
+                <div id="ranking-view" class="view">
+                    <h2>Country Ranking</h2>
+                    <label>Top-N:
+                        <select id="topn-selector">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="110">All</option>
+                        </select>
+                    </label>
+                    <svg id="ranking-svg"></svg>
+                </div>
+
+                <!-- VIS-3A: Temporal Metrics (30% width) -->
+                <div id="temporal-view" class="view">
+                    <h2>Temporal Metrics</h2>
+                    <svg id="temporal-svg"></svg>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Time Slider -->
+        <footer id="time-controls">
+            <input type="range" id="time-slider" min="0" max="9" value="9" step="1">
+            <button id="play-button">Play</button>
+            <button id="reset-button">Reset</button>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
