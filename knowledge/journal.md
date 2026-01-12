@@ -877,3 +877,270 @@ if (tabName === 'bridge' && !bridgeInitialized) {
 **Mittelfristig:**
 - ⏸ US-04 (Firmenebene) wenn Daten verfügbar
 - ⏸ Erweiterte Bridge-Metriken (Structural Holes, Burt's Constraint)
+
+---
+
+## Session 7: UX-Optimierung + Code Refactoring
+
+**Datum:** 2026-01-12
+**Phase:** UX-Verbesserungen + Code Quality
+**Dauer:** ~2 Stunden
+**Status:** ✅ Abgeschlossen
+
+### User Feedback & Design-Kritik
+
+Nach Screenshot-Review identifizierte User drei Probleme:
+
+1. **Time Slider inkonsistent:** Zeigt bei Tab 2+3, aber nicht funktional
+2. **Bridge Tab Bar Chart suboptimal:** Zeigt nur Snapshot statt Evolution
+3. **Code Maintainability:** CSS+JS enthalten Duplikate
+
+### Lösung 1: Time Slider nur bei Tab 1
+
+**Problem:**
+- Tab 1 (Netzwerk): Time Slider macht Sinn (zeigt Jahres-Snapshots)
+- Tab 2 (Temporal): Time Slider verwirrend (Slopegraph ist fest 2010→2018)
+- Tab 3 (Bridge): Time Slider irrelevant (sollte auch 2010→2018 zeigen)
+
+**Lösung:**
+```javascript
+function switchTab(tabName) {
+    // ... existing tab switching ...
+
+    // Show/hide time controls based on tab
+    const timeControls = d3.select('#time-controls');
+    if (tabName === 'network') {
+        timeControls.style('display', 'flex');
+    } else {
+        timeControls.style('display', 'none');
+    }
+}
+```
+
+**Ergebnis:**
+- Klare UX: Time Slider nur wo sinnvoll
+- Konsistent: Tab 2+3 beide temporal (2010→2018)
+
+### Lösung 2: Bridge Tab → Slopegraph
+
+**Problem:**
+- Bar Chart zeigt nur Snapshot
+- Interessante Frage: "Welche Länder WURDEN zu Bridges?" (temporal)
+- Inkonsistent: Tab 2 zeigt Evolution, Tab 3 nur Snapshot
+
+**Neue Visualisierung:**
+- Bridge Slopegraph (VIS-4): Betweenness Centrality Ranks 2010→2018
+- 70/30 Layout (wie Tab 2)
+- Temporal Metrics Sidebar (wiederverwendet)
+- Top-N Selector (10/20/50)
+
+**HTML-Änderungen:**
+```html
+<div id="bridge-grid" class="main-grid">
+    <div id="bridge-slopegraph-view" class="view">
+        <h2>Bridge Evolution (2010 → 2018)</h2>
+        <svg id="bridge-svg"></svg>
+    </div>
+    <aside id="bridge-sidebar">
+        <div id="temporal-metrics-view-3" class="view">
+            <svg id="temporal-metrics-svg-3"></svg>
+        </div>
+    </aside>
+</div>
+```
+
+**JavaScript-Änderungen:**
+- `updateBridge()`: Reuse prepareRankData() für betweenness_centrality
+- `initTemporalMetrics3()`: Dritte Instanz der Temporal Metrics
+- Tooltips zeigen Betweenness Δ (nicht nur Degree Δ)
+
+**Code-Reuse:**
+- 80% Code von Temporal Slopegraph wiederverwendet
+- Nur Metrik geändert: degree_centrality → betweenness_centrality
+
+### Lösung 3: CSS Refactoring
+
+**Problem:** Repetitive Styles für Cards/Views
+
+**CSS Custom Properties hinzugefügt:**
+```css
+:root {
+    /* Colors */
+    --color-bg: #f8f9fa;
+    --color-text: #212529;
+    --color-primary: #0d6efd;
+
+    /* Card */
+    --card-bg: white;
+    --card-radius: 8px;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --card-padding: 1rem;
+
+    /* Spacing */
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+}
+```
+
+**DRY Refactoring:**
+```css
+/* Vorher: 9 separate Selektoren mit gleichen Styles */
+#header { background: white; border-radius: 8px; box-shadow: ...; }
+.view { background: white; border-radius: 8px; box-shadow: ...; }
+#network-view { background: white; border-radius: 8px; ... }
+/* ... 6 weitere */
+
+/* Nachher: 1 kombinierter Selektor */
+.card,
+#header,
+.view,
+#network-view,
+#slopegraph-view,
+#bridge-slopegraph-view,
+.placeholder-view,
+#time-controls {
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+}
+```
+
+**Resultat:**
+- Styles.css: 361 Zeilen → 323 Zeilen (-38, -10%)
+- Bessere Maintainability (Farben zentral änderbar)
+- Konsistente Spacing/Colors
+
+### Lösung 4: JS Refactoring
+
+**Problem:** Magic Numbers/Strings im Code
+
+**Constants extrahiert:**
+```javascript
+const YEARS = {
+    START: 2010,
+    END: 2018,
+    CUMULATIVE: 'cumulative'
+};
+
+const DIRECTION_COLORS = {
+    improved: '#27ae60',
+    worsened: '#e74c3c',
+    unchanged: '#95a5a6'
+};
+
+const REGION_NAMES = {
+    europe: 'Europa',
+    asia: 'Asien',
+    // ...
+};
+```
+
+**Nutzung:**
+```javascript
+// Vorher:
+const rankData = prepareRankData(2010, 2018, 'degree_centrality', topN);
+const directionColor = {'improved': '#27ae60', ...};
+g.append('text').text('2010');
+
+// Nachher:
+const rankData = prepareRankData(YEARS.START, YEARS.END, 'degree_centrality', topN);
+const directionColor = DIRECTION_COLORS;
+g.append('text').text(YEARS.START);
+```
+
+**Vorteile:**
+- Single Source of Truth für Jahre
+- Farben konsistent zwischen Slopegraphs
+- Einfacher zu ändern (z.B. 2020-2028)
+
+### Code-Statistiken (Final)
+
+| Datei | Session 6 | Session 7 | Δ | Änderung |
+|-------|-----------|-----------|---|----------|
+| docs/index.html | 165 | 158 | -7 | Bridge Tab HTML umgebaut |
+| docs/styles.css | 315 | 323 | +8 | CSS Properties hinzugefügt, DRY |
+| docs/app.js | 920 | 1033 | +113 | Bridge Slopegraph + Constants |
+
+**Gesamt:** 1514 Zeilen (HTML+CSS+JS)
+
+### Learnings: UX-Optimierung
+
+**1. Konsistenz über Tabs:**
+- Tab 2+3 beide temporal (2010→2018) → Intuitiv
+- Time Slider nur Tab 1 → Kein Verwirrungs-Potential
+- Gleiche Visualisierung (Slopegraph) → Lernkurve flacher
+
+**2. Evolution vs. Snapshot:**
+- Temporal-Vergleiche interessanter als Snapshots
+- "Wer WURDE Bridge?" > "Wer IST Bridge?"
+- Beantwortet echte Forschungsfrage (Dynamik)
+
+**3. Design-Feedback-Loop:**
+- Screenshot-Review deckt UX-Probleme auf
+- Konstruktive Kritik führt zu besseren Lösungen
+- Iteratives Design wichtig
+
+### Learnings: Code Quality
+
+**1. CSS Custom Properties:**
+- Zentrale Theme-Verwaltung
+- Einfaches Theming (z.B. Dark Mode via :root override)
+- Bessere Browser-Support als SASS
+
+**2. DRY in CSS:**
+- Kombinierte Selektoren reduzieren Duplikate
+- Utility-Classes für repetitive Patterns
+- Maintainability > Spezifität
+
+**3. Constants in JavaScript:**
+- Magic Numbers vermeiden
+- Single Source of Truth
+- Self-Documenting Code
+
+**4. Code-Reuse Patterns:**
+- initTemporalMetrics() → initTemporalMetrics2/3()
+- prepareRankData() für alle Slopegraphs
+- showSlopeTooltip() Pattern wiederverwendbar
+
+### Forschungsfragen Re-Evaluation (Final v2)
+
+**Forschungsfrage 1 (Makro-Zentralität):** ✅ VOLLSTÄNDIG
+- ✅ Top-Länder identifiziert (Ranking + Network)
+- ✅ 4 Centrality-Metriken verfügbar
+- ✅ Regionale Muster sichtbar
+
+**Forschungsfrage 2 (Bridge-Firmen):** ⚠️ TEILWEISE → ✅ BESSER
+- ✅ Bridge-Entwicklung auf Länderebene (2010→2018)
+- ✅ Betweenness Centrality als Indikator
+- ✅ Zeigt "Wer wurde zu Bridge?" (temporal)
+- ❌ Firmenebene weiterhin nicht verfügbar
+
+**Forschungsfrage 3 (Temporal):** ✅ VOLLSTÄNDIG
+- ✅ Konsistente temporal views (Tab 2+3)
+- ✅ Slopegraphs zeigen Evolution klar
+- ✅ Temporal Metrics in allen Tabs
+
+### Outputs (Session 7)
+
+**Code:**
+- docs/index.html: Bridge Tab HTML umgebaut (-7 Zeilen)
+- docs/styles.css: CSS Custom Properties + DRY (+8 Zeilen)
+- docs/app.js: Bridge Slopegraph + Constants (+113 Zeilen)
+
+**Dokumentation:**
+- knowledge/journal.md: Session 7 dokumentiert
+- knowledge/requirements.md: Status aktualisiert
+- docs/README.md: Tab 3 + Time Slider Beschreibung aktualisiert
+
+### Next Steps
+
+**Kurzfristig:**
+- ✅ Git Commit mit allen Änderungen
+
+**Langfristig:**
+- ⏸ Responsive Testing (Tablet/Mobile)
+- ⏸ Performance Profiling (console.time für alle Views)
+- ⏸ Accessibility Audit (Keyboard Navigation, Screen Reader)

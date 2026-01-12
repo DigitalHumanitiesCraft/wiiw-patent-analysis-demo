@@ -1,3 +1,32 @@
+/* ===== CSS CUSTOM PROPERTIES ===== */
+:root {
+    /* Colors */
+    --color-bg: #f8f9fa;
+    --color-text: #212529;
+    --color-text-muted: #6c757d;
+    --color-text-lighter: #adb5bd;
+    --color-primary: #0d6efd;
+    --color-white: #fff;
+    --color-border: #dee2e6;
+
+    /* Card */
+    --card-bg: white;
+    --card-radius: 8px;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --card-padding: 1rem;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+}
+
 /* ===== LAYOUT ===== */
 * {
     margin: 0;
@@ -7,8 +36,8 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f8f9fa;
-    color: #212529;
+    background: var(--color-bg);
+    color: var(--color-text);
 }
 
 .container {
@@ -17,16 +46,27 @@ body {
     height: 100vh;
     max-width: 1920px;
     margin: 0 auto;
-    padding: 1rem;
-    gap: 1rem;
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+}
+
+/* Shared Card Styles */
+.card,
+#header,
+.view,
+#network-view,
+#slopegraph-view,
+#bridge-slopegraph-view,
+.placeholder-view,
+#time-controls {
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
 }
 
 /* Header */
 #header {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: var(--spacing-lg);
 }
 
 #header h1 {
@@ -127,24 +167,19 @@ body {
     height: 100%;
 }
 
-#network-view {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+#network-view,
+.view,
+#slopegraph-view,
+#bridge-slopegraph-view {
+    padding: var(--card-padding);
 }
 
-#sidebar {
+#sidebar,
+#temporal-sidebar,
+#bridge-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-}
-
-.view {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    gap: var(--spacing-md);
 }
 
 #ranking-view {
@@ -153,29 +188,18 @@ body {
 }
 
 #temporal-metrics-view,
-#temporal-metrics-view-2 {
+#temporal-metrics-view-2,
+#temporal-metrics-view-3 {
     flex: 1;
 }
 
-#temporal-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-/* Slopegraph View */
-#slopegraph-view {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-#slopegraph-controls-header h2 {
+#slopegraph-controls-header h2,
+#bridge-controls-header h2 {
     margin-bottom: 0.5rem;
 }
 
 #slopegraph-controls,
+#bridge-controls,
 #network-controls-header #network-controls {
     display: flex;
     gap: 1rem;
@@ -183,39 +207,21 @@ body {
     margin-top: 0.5rem;
 }
 
-#slopegraph-svg {
+#slopegraph-svg,
+#bridge-svg {
     height: calc(100% - 80px);
 }
 
-/* Placeholder View */
-.placeholder-view {
-    background: white;
-    border-radius: 8px;
-    padding: 3rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.placeholder-view h2 {
-    color: #6c757d;
-    margin-bottom: 1rem;
-}
-
-.placeholder-text {
-    color: #adb5bd;
-    font-size: 1rem;
-    margin: 0.5rem 0;
+#temporal-metrics-view-3 {
+    flex: 1;
 }
 
 /* Footer */
 #time-controls {
-    background: white;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: var(--card-padding);
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--spacing-md);
 }
 
 #time-slider {
@@ -237,7 +243,8 @@ svg {
 }
 
 #temporal-metrics-svg,
-#temporal-metrics-svg-2 {
+#temporal-metrics-svg-2,
+#temporal-metrics-svg-3 {
     height: calc(100% - 40px);
 }
 
@@ -309,7 +316,8 @@ svg {
     }
 
     #sidebar,
-    #temporal-sidebar {
+    #temporal-sidebar,
+    #bridge-sidebar {
         flex-direction: row;
     }
 }
@@ -342,7 +350,8 @@ svg {
     }
 
     #sidebar,
-    #temporal-sidebar {
+    #temporal-sidebar,
+    #bridge-sidebar {
         flex-direction: column;
     }
 }

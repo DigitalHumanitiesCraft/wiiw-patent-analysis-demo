@@ -1,9 +1,35 @@
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const YEARS = {
+    START: 2010,
+    END: 2018,
+    CUMULATIVE: 'cumulative'
+};
+
+const DIRECTION_COLORS = {
+    improved: '#27ae60',
+    worsened: '#e74c3c',
+    unchanged: '#95a5a6'
+};
+
+const REGION_NAMES = {
+    europe: 'Europa',
+    asia: 'Asien',
+    north_america: 'Nordamerika',
+    south_america: 'Süd-/Mittelamerika',
+    africa: 'Afrika',
+    oceania: 'Ozeanien',
+    middle_east: 'Naher Osten'
+};
+
+// ============================================================================
 // GLOBAL STATE
 // ============================================================================
 
 let data = null;           // Full JSON data
-let currentYear = 'cumulative';
+let currentYear = YEARS.CUMULATIVE;
 let currentCentrality = 'degree_centrality';
 let currentTopN = 20;
 let currentWeightThreshold = 1;
@@ -541,7 +567,7 @@ function updateSlopegraph() {
     const plotHeight = height - margin.top - margin.bottom;
 
     // Prepare data
-    const rankData = prepareRankData(2010, 2018, temporalCentrality, temporalTopN);
+    const rankData = prepareRankData(YEARS.START, YEARS.END, temporalCentrality, temporalTopN);
 
     // Clear previous content
     container.selectAll('*').remove();
@@ -561,11 +587,7 @@ function updateSlopegraph() {
         .range([1, 4]);
 
     // Color scale for direction
-    const directionColor = {
-        'improved': '#27ae60',   // Green
-        'worsened': '#e74c3c',   // Red
-        'unchanged': '#95a5a6'   // Gray
-    };
+    const directionColor = DIRECTION_COLORS;
 
     // Column headers
     g.append('text')
@@ -574,7 +596,7 @@ function updateSlopegraph() {
         .attr('text-anchor', 'middle')
         .attr('font-size', '16px')
         .attr('font-weight', 'bold')
-        .text('2010');
+        .text(YEARS.START);
 
     g.append('text')
         .attr('x', plotWidth)
@@ -582,7 +604,7 @@ function updateSlopegraph() {
         .attr('text-anchor', 'middle')
         .attr('font-size', '16px')
         .attr('font-weight', 'bold')
-        .text('2018');
+        .text(YEARS.END);
 
     // Draw lines
     const lines = g.selectAll('.slope-line')
@@ -747,145 +769,230 @@ function initTemporalMetrics2() {
 }
 
 // ============================================================================
-// VIS-4: BRIDGE ANALYSIS (Betweenness Centrality)
+// VIS-4: BRIDGE SLOPEGRAPH (Betweenness Centrality 2010→2018)
 // ============================================================================
 
 function initBridge() {
     const container = d3.select('#bridge-svg');
-    container.selectAll('*').remove();
+    const width = container.node().clientWidth;
+    const height = container.node().clientHeight;
+
+    container
+        .attr('width', width)
+        .attr('height', height);
+
     updateBridge();
+    initTemporalMetrics3(); // Initialize third temporal metrics view
 }
 
 function updateBridge() {
     const container = d3.select('#bridge-svg');
-    container.selectAll('*').remove();
-
-    const yearData = currentYear === 'cumulative' ? data.cumulative : data.temporal[currentYear];
-
-    // Sort by betweenness centrality and take top N
-    const sortedNodes = [...yearData.nodes]
-        .sort((a, b) => b.betweenness_centrality - a.betweenness_centrality)
-        .slice(0, bridgeTopN);
-
-    // Dimensions
     const width = container.node().clientWidth;
     const height = container.node().clientHeight;
-    const margin = {top: 40, right: 30, bottom: 40, left: 80};
+
+    const margin = {top: 60, right: 150, bottom: 40, left: 150};
     const plotWidth = width - margin.left - margin.right;
     const plotHeight = height - margin.top - margin.bottom;
+
+    // Prepare data using betweenness_centrality
+    const rankData = prepareRankData(YEARS.START, YEARS.END, 'betweenness_centrality', bridgeTopN);
+
+    // Clear previous content
+    container.selectAll('*').remove();
 
     const g = container.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Scales
-    const xScale = d3.scaleLinear()
-        .domain([0, d3.max(sortedNodes, d => d.betweenness_centrality)])
-        .range([0, plotWidth]);
+    // Y-Scale (rank position, 1 = top)
+    const maxRank = Math.max(...rankData.map(d => Math.max(d.startRank, d.endRank)));
+    const yScale = d3.scaleLinear()
+        .domain([0.5, maxRank + 0.5])
+        .range([0, plotHeight]);
 
-    const yScale = d3.scaleBand()
-        .domain(sortedNodes.map((d, i) => i))
-        .range([0, plotHeight])
-        .padding(0.2);
+    // Line thickness scale
+    const thicknessScale = d3.scaleLinear()
+        .domain([0, d3.max(rankData, d => Math.abs(d.rankChange))])
+        .range([1, 4]);
 
-    // Bars
-    g.selectAll('rect')
-        .data(sortedNodes)
-        .join('rect')
+    // Color scale for direction
+    const directionColor = DIRECTION_COLORS;
+
+    // Column headers
+    g.append('text')
         .attr('x', 0)
-        .attr('y', (d, i) => yScale(i))
-        .attr('width', d => xScale(d.betweenness_centrality))
-        .attr('height', yScale.bandwidth())
-        .attr('fill', d => getCountryColor(d.id))
-        .attr('opacity', 0.8)
-        .on('mouseover', function(event, d) {
-            d3.select(this).attr('opacity', 1);
-            showBridgeTooltip(event, d);
-        })
-        .on('mouseout', function() {
-            d3.select(this).attr('opacity', 0.8);
-            hideBridgeTooltip();
-        });
+        .attr('y', -30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text(YEARS.START);
 
-    // Country labels
-    g.selectAll('.country-label')
-        .data(sortedNodes)
+    g.append('text')
+        .attr('x', plotWidth)
+        .attr('y', -30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text(YEARS.END);
+
+    // Draw lines
+    g.selectAll('.slope-line')
+        .data(rankData)
+        .join('line')
+        .attr('class', 'slope-line')
+        .attr('x1', 0)
+        .attr('y1', d => yScale(d.startRank))
+        .attr('x2', plotWidth)
+        .attr('y2', d => yScale(d.endRank))
+        .attr('stroke', d => directionColor[d.direction])
+        .attr('stroke-width', d => thicknessScale(Math.abs(d.rankChange)))
+        .attr('stroke-opacity', 0.6)
+        .on('mouseover', showBridgeTooltip)
+        .on('mouseout', hideBridgeTooltip)
+        .style('cursor', 'pointer');
+
+    // Left labels (2010)
+    g.selectAll('.label-left')
+        .data(rankData)
         .join('text')
-        .attr('class', 'country-label')
-        .attr('x', -5)
-        .attr('y', (d, i) => yScale(i) + yScale.bandwidth() / 2)
+        .attr('class', 'label-left')
+        .attr('x', -10)
+        .attr('y', d => yScale(d.startRank))
         .attr('dy', '0.35em')
         .attr('text-anchor', 'end')
         .attr('font-size', '11px')
-        .attr('fill', '#333')
-        .text(d => d.id);
+        .text(d => `${d.startRank}. ${d.country}`);
 
-    // Value labels
-    g.selectAll('.value-label')
-        .data(sortedNodes)
+    // Right labels (2018)
+    g.selectAll('.label-right')
+        .data(rankData)
         .join('text')
-        .attr('class', 'value-label')
-        .attr('x', d => xScale(d.betweenness_centrality) + 5)
-        .attr('y', (d, i) => yScale(i) + yScale.bandwidth() / 2)
+        .attr('class', 'label-right')
+        .attr('x', plotWidth + 10)
+        .attr('y', d => yScale(d.endRank))
         .attr('dy', '0.35em')
-        .attr('font-size', '10px')
-        .attr('fill', '#666')
-        .text(d => d.betweenness_centrality.toFixed(4));
-
-    // X-axis
-    g.append('g')
-        .attr('transform', `translate(0,${plotHeight})`)
-        .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format('.3f')));
-
-    // X-axis label
-    g.append('text')
-        .attr('x', plotWidth / 2)
-        .attr('y', plotHeight + 35)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '12px')
-        .attr('fill', '#333')
-        .text('Betweenness Centrality');
-
-    // Title
-    g.append('text')
-        .attr('x', plotWidth / 2)
-        .attr('y', -20)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '14px')
-        .attr('font-weight', 'bold')
-        .attr('fill', '#333')
-        .text(`Top ${bridgeTopN} Bridge-Länder (Betweenness Centrality)`);
+        .attr('text-anchor', 'start')
+        .attr('font-size', '11px')
+        .text(d => `${d.endRank}. ${d.country}`);
 }
 
 function showBridgeTooltip(event, d) {
+    // Amplify line width on hover
+    d3.select(event.currentTarget)
+        .attr('stroke-width', function() {
+            return parseFloat(d3.select(this).attr('stroke-width')) * 2;
+        })
+        .attr('stroke-opacity', 1);
+
+    // Show tooltip
+    const changeSymbol = d.rankChange > 0 ? '↑' : (d.rankChange < 0 ? '↓' : '−');
+    const changeClass = d.direction === 'improved' ? 'positive' : (d.direction === 'worsened' ? 'negative' : 'neutral');
+
     const tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')
-        .style('position', 'absolute')
         .style('left', (event.pageX + 10) + 'px')
         .style('top', (event.pageY - 10) + 'px')
-        .style('opacity', 1);
-
-    const region = regionMapping[d.id] || 'europe';
-    const regionName = {
-        'europe': 'Europa',
-        'asia': 'Asien',
-        'north_america': 'Nordamerika',
-        'south_america': 'Süd-/Mittelamerika',
-        'africa': 'Afrika',
-        'oceania': 'Ozeanien',
-        'middle_east': 'Naher Osten'
-    }[region];
-
-    tooltip.html(`
-        <strong>${d.id}</strong><br/>
-        Region: ${regionName}<br/>
-        <strong>Betweenness:</strong> ${d.betweenness_centrality.toFixed(4)}<br/>
-        Degree: ${d.degree_centrality.toFixed(3)}<br/>
-        Partners: ${d.num_partners}
-    `);
+        .html(`
+            <strong>${d.country}</strong><br>
+            <div style="margin-top: 5px;">
+                <span style="color: #aaa;">Rank 2010:</span> ${d.startRank}<br>
+                <span style="color: #aaa;">Rank 2018:</span> ${d.endRank}<br>
+                <span style="color: #aaa;">Change:</span> <span class="${changeClass}">${Math.abs(d.rankChange)} ${changeSymbol}</span><br>
+            </div>
+            <div style="margin-top: 5px; border-top: 1px solid #555; padding-top: 5px;">
+                <span style="color: #aaa;">Betweenness 2010:</span> ${d.startValue.toFixed(4)}<br>
+                <span style="color: #aaa;">Betweenness 2018:</span> ${d.endValue.toFixed(4)}<br>
+                <span style="color: #aaa;">Δ Betweenness:</span> ${(d.endValue - d.startValue).toFixed(4)}
+            </div>
+        `);
 }
 
-function hideBridgeTooltip() {
+function hideBridgeTooltip(event) {
+    // Reset line width
+    d3.select(event.currentTarget)
+        .attr('stroke-width', function() {
+            return parseFloat(d3.select(this).attr('stroke-width')) / 2;
+        })
+        .attr('stroke-opacity', 0.6);
+
+    // Remove tooltip
     d3.selectAll('.tooltip').remove();
+}
+
+function initTemporalMetrics3() {
+    // Initialize third instance of temporal metrics for bridge tab
+    const metrics = ['density', 'modularity', 'num_communities', 'avg_clustering'];
+    const years = data.metadata.years;
+
+    const temporalData = metrics.map(metric => ({
+        metric,
+        values: years.map(year => ({
+            year,
+            value: data.temporal[year].metrics[metric]
+        }))
+    }));
+
+    const container = d3.select('#temporal-metrics-svg-3');
+    const margin = {top: 20, right: 20, bottom: 30, left: 50};
+    const width = container.node().clientWidth - margin.left - margin.right;
+    const height = container.node().clientHeight - margin.top - margin.bottom;
+
+    container.selectAll('*').remove();
+
+    const g = container.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Small multiples layout (2x2 grid)
+    const cellWidth = width / 2 - 10;
+    const cellHeight = height / 2 - 10;
+
+    temporalData.forEach((d, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const offsetX = col * (cellWidth + 10);
+        const offsetY = row * (cellHeight + 10);
+
+        const cell = g.append('g')
+            .attr('transform', `translate(${offsetX},${offsetY})`);
+
+        // Scales
+        const xScale = d3.scaleLinear()
+            .domain(d3.extent(years))
+            .range([0, cellWidth]);
+
+        const yScale = d3.scaleLinear()
+            .domain(d3.extent(d.values, v => v.value))
+            .range([cellHeight, 0])
+            .nice();
+
+        // Line
+        const line = d3.line()
+            .x(v => xScale(v.year))
+            .y(v => yScale(v.value));
+
+        cell.append('path')
+            .datum(d.values)
+            .attr('fill', 'none')
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', 2)
+            .attr('d', line);
+
+        // Axes
+        cell.append('g')
+            .attr('transform', `translate(0,${cellHeight})`)
+            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')));
+
+        cell.append('g')
+            .call(d3.axisLeft(yScale).ticks(4));
+
+        // Title
+        cell.append('text')
+            .attr('x', cellWidth / 2)
+            .attr('y', -5)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '12px')
+            .attr('font-weight', 'bold')
+            .text(d.metric.replace(/_/g, ' '));
+    });
 }
 
 // ============================================================================
@@ -911,6 +1018,14 @@ function switchTab(tabName) {
 
     d3.select(`#tab-${tabName}`)
         .classed('active', true);
+
+    // Show/hide time controls based on tab
+    const timeControls = d3.select('#time-controls');
+    if (tabName === 'network') {
+        timeControls.style('display', 'flex');
+    } else {
+        timeControls.style('display', 'none');
+    }
 
     // Lazy initialization for slopegraph
     if (tabName === 'temporal' && !slopegraphInitialized) {

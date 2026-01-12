@@ -127,26 +127,33 @@
                 </div>
             </div>
 
-            <!-- Tab 3: Bridge-Firmen -->
+            <!-- Tab 3: Bridge-Länder -->
             <div id="tab-bridge" class="tab-content" role="tabpanel" aria-labelledby="tab-bridge">
-                <div class="placeholder-view">
-                    <h2>Bridge-Länder Analyse</h2>
-                    <p class="placeholder-text">
-                        Diese Ansicht zeigt Länder mit hoher Betweenness Centrality - potenzielle "Bridge"-Positionen im Netzwerk.
-                    </p>
-                    <p class="placeholder-text" style="color: #6c757d; font-size: 0.9rem; margin-top: 1rem;">
-                        Hinweis: Firmenebene-Daten (US-04) sind nicht verfügbar. Die Analyse basiert auf Länderebene als Proxy.
-                    </p>
-                    <div style="margin-top: 2rem;">
-                        <label>Top-N Bridge-Länder:
-                            <select id="bridge-topn-selector">
-                                <option value="10" selected>10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                            </select>
-                        </label>
+                <div id="bridge-grid" class="main-grid">
+                    <!-- VIS-4: Bridge Slopegraph (70% width) -->
+                    <div id="bridge-slopegraph-view" class="view">
+                        <div id="bridge-controls-header">
+                            <h2>Bridge Evolution (2010 → 2018)</h2>
+                            <div id="bridge-controls">
+                                <label>Top-N:
+                                    <select id="bridge-topn-selector">
+                                        <option value="10" selected>10</option>
+                                        <option value="20">20</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <svg id="bridge-svg"></svg>
                     </div>
-                    <svg id="bridge-svg" style="width: 100%; height: 500px; margin-top: 1rem;"></svg>
+
+                    <!-- Right Sidebar: Temporal Metrics (reused) -->
+                    <aside id="bridge-sidebar">
+                        <div id="temporal-metrics-view-3" class="view">
+                            <h2>Temporal Metrics</h2>
+                            <svg id="temporal-metrics-svg-3"></svg>
+                        </div>
+                    </aside>
                 </div>
             </div>
         </main>
