@@ -12,54 +12,133 @@
         <!-- Header -->
         <header id="header">
             <h1>Patent Cooperation Network (2010-2018)</h1>
-            <div id="controls">
-                <label>Year: <span id="year-label">Cumulative</span></label>
-                <select id="centrality-selector">
-                    <option value="degree_centrality">Degree Centrality</option>
-                    <option value="betweenness_centrality">Betweenness Centrality</option>
-                    <option value="closeness_centrality">Closeness Centrality</option>
-                    <option value="eigenvector_centrality">Eigenvector Centrality</option>
-                </select>
+
+            <!-- Tab Navigation -->
+            <nav id="tabs" role="tablist">
+                <button class="tab-button active" data-tab="network" role="tab" aria-selected="true" aria-controls="tab-network">
+                    Netzwerk-Analyse
+                </button>
+                <button class="tab-button" data-tab="temporal" role="tab" aria-selected="false" aria-controls="tab-temporal">
+                    Temporale Entwicklung
+                </button>
+                <button class="tab-button" data-tab="bridge" role="tab" aria-selected="false" aria-controls="tab-bridge" disabled>
+                    Bridge-Firmen
+                </button>
+            </nav>
+
+            <div id="legend">
+                <span class="legend-title">Regionen:</span>
+                <span class="legend-item"><span class="color-box" style="background: #3498db;"></span> Europa</span>
+                <span class="legend-item"><span class="color-box" style="background: #27ae60;"></span> Asien</span>
+                <span class="legend-item"><span class="color-box" style="background: #e74c3c;"></span> Nordamerika</span>
+                <span class="legend-item"><span class="color-box" style="background: #8e44ad;"></span> Süd-/Mittelamerika</span>
+                <span class="legend-item"><span class="color-box" style="background: #e67e22;"></span> Afrika</span>
+                <span class="legend-item"><span class="color-box" style="background: #16a085;"></span> Ozeanien</span>
+                <span class="legend-item"><span class="color-box" style="background: #a04000;"></span> Naher Osten</span>
             </div>
-            <div id="legend"></div>
         </header>
 
-        <!-- Main Content Grid -->
-        <main id="main-grid">
-            <!-- VIS-1A: Network Overview (70% width) -->
-            <div id="network-view" class="view">
-                <h2>Network Overview</h2>
-                <svg id="network-svg"></svg>
-                <div id="network-controls">
-                    <label>Edge Weight Filter:
-                        <input type="range" id="weight-slider" min="1" max="14" value="1">
-                        <span id="weight-value">1</span>
-                    </label>
+        <!-- Tab Content Container -->
+        <main id="main-content">
+            <!-- Tab 1: Netzwerk-Analyse -->
+            <div id="tab-network" class="tab-content active" role="tabpanel" aria-labelledby="tab-network">
+                <div id="network-grid" class="main-grid">
+                    <!-- VIS-1A: Network Overview (70% width) -->
+                    <div id="network-view" class="view">
+                        <div id="network-controls-header">
+                            <h2>Network Overview</h2>
+                            <div id="network-controls">
+                                <label>Year: <span id="year-label">Cumulative</span></label>
+                                <select id="centrality-selector">
+                                    <option value="degree_centrality">Degree Centrality</option>
+                                    <option value="betweenness_centrality">Betweenness Centrality</option>
+                                    <option value="closeness_centrality">Closeness Centrality</option>
+                                    <option value="eigenvector_centrality">Eigenvector Centrality</option>
+                                </select>
+                                <label>Edge Weight Filter:
+                                    <input type="range" id="weight-slider" min="1" max="14" value="1">
+                                    <span id="weight-value">1</span>
+                                </label>
+                            </div>
+                        </div>
+                        <svg id="network-svg"></svg>
+                    </div>
+
+                    <!-- Right Sidebar -->
+                    <aside id="sidebar">
+                        <!-- VIS-1B: Centrality Ranking (30% width) -->
+                        <div id="ranking-view" class="view">
+                            <h2>Country Ranking</h2>
+                            <label>Top-N:
+                                <select id="topn-selector">
+                                    <option value="10">10</option>
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                    <option value="110">All</option>
+                                </select>
+                            </label>
+                            <svg id="ranking-svg"></svg>
+                        </div>
+
+                        <!-- VIS-3A: Temporal Metrics (30% width) -->
+                        <div id="temporal-metrics-view" class="view">
+                            <h2>Temporal Metrics</h2>
+                            <svg id="temporal-metrics-svg"></svg>
+                        </div>
+                    </aside>
                 </div>
             </div>
 
-            <!-- Right Sidebar -->
-            <aside id="sidebar">
-                <!-- VIS-1B: Centrality Ranking (30% width) -->
-                <div id="ranking-view" class="view">
-                    <h2>Country Ranking</h2>
-                    <label>Top-N:
-                        <select id="topn-selector">
-                            <option value="10">10</option>
-                            <option value="20" selected>20</option>
-                            <option value="50">50</option>
-                            <option value="110">All</option>
-                        </select>
-                    </label>
-                    <svg id="ranking-svg"></svg>
-                </div>
+            <!-- Tab 2: Temporale Entwicklung -->
+            <div id="tab-temporal" class="tab-content" role="tabpanel" aria-labelledby="tab-temporal">
+                <div id="temporal-grid" class="main-grid">
+                    <!-- VIS-3B: Slopegraph (70% width) -->
+                    <div id="slopegraph-view" class="view">
+                        <div id="slopegraph-controls-header">
+                            <h2>Rank Changes (2010 → 2018)</h2>
+                            <div id="slopegraph-controls">
+                                <label>Centrality:
+                                    <select id="temporal-centrality-selector">
+                                        <option value="degree_centrality">Degree Centrality</option>
+                                        <option value="betweenness_centrality">Betweenness Centrality</option>
+                                        <option value="closeness_centrality">Closeness Centrality</option>
+                                        <option value="eigenvector_centrality">Eigenvector Centrality</option>
+                                    </select>
+                                </label>
+                                <label>Top-N:
+                                    <select id="temporal-topn-selector">
+                                        <option value="10">10</option>
+                                        <option value="20" selected>20</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <svg id="slopegraph-svg"></svg>
+                    </div>
 
-                <!-- VIS-3A: Temporal Metrics (30% width) -->
-                <div id="temporal-view" class="view">
-                    <h2>Temporal Metrics</h2>
-                    <svg id="temporal-svg"></svg>
+                    <!-- Right Sidebar: Temporal Metrics (reused) -->
+                    <aside id="temporal-sidebar">
+                        <div id="temporal-metrics-view-2" class="view">
+                            <h2>Temporal Metrics</h2>
+                            <svg id="temporal-metrics-svg-2"></svg>
+                        </div>
+                    </aside>
                 </div>
-            </aside>
+            </div>
+
+            <!-- Tab 3: Bridge-Firmen (Placeholder) -->
+            <div id="tab-bridge" class="tab-content" role="tabpanel" aria-labelledby="tab-bridge">
+                <div class="placeholder-view">
+                    <h2>Bridge-Firmen Analyse</h2>
+                    <p class="placeholder-text">
+                        Diese Ansicht wartet auf die Implementierung der Firmenebene-Daten (US-04).
+                    </p>
+                    <p class="placeholder-text">
+                        Geplante Features: Identifikation von Firmen mit hohem Bridge-Potenzial basierend auf Anzahl der Partnerländer.
+                    </p>
+                </div>
+            </div>
         </main>
 
         <!-- Time Slider -->

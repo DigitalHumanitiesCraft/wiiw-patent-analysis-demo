@@ -8,11 +8,99 @@ let currentCentrality = 'degree_centrality';
 let currentTopN = 20;
 let currentWeightThreshold = 1;
 
+let currentTab = 'network'; // Current active tab
+let temporalCentrality = 'degree_centrality'; // Centrality for temporal tab
+let temporalTopN = 20;      // Top-N for temporal tab
+
 let simulation = null;     // Force simulation
 let svg = null;            // SVG selections
+let slopegraphInitialized = false; // Track if slopegraph has been initialized
 
 // Color scale for communities (will be set after data load)
 let colorScale = null;
+
+// Region mapping (ISO-2 codes → regions)
+const regionMapping = {
+    // Europe (40 countries)
+    'AL': 'europe', 'AD': 'europe', 'AT': 'europe', 'BY': 'europe', 'BE': 'europe',
+    'BA': 'europe', 'BG': 'europe', 'HR': 'europe', 'CY': 'europe', 'CZ': 'europe',
+    'DK': 'europe', 'EE': 'europe', 'FI': 'europe', 'FR': 'europe', 'DE': 'europe',
+    'GR': 'europe', 'HU': 'europe', 'IS': 'europe', 'IE': 'europe', 'IT': 'europe',
+    'XK': 'europe', 'LV': 'europe', 'LI': 'europe', 'LT': 'europe', 'LU': 'europe',
+    'MT': 'europe', 'MD': 'europe', 'MC': 'europe', 'ME': 'europe', 'NL': 'europe',
+    'MK': 'europe', 'NO': 'europe', 'PL': 'europe', 'PT': 'europe', 'RO': 'europe',
+    'RU': 'europe', 'SM': 'europe', 'RS': 'europe', 'SK': 'europe', 'SI': 'europe',
+    'ES': 'europe', 'SE': 'europe', 'CH': 'europe', 'UA': 'europe', 'GB': 'europe',
+    'VA': 'europe',
+
+    // Asia (25 countries)
+    'AF': 'asia', 'AM': 'asia', 'AZ': 'asia', 'BH': 'asia', 'BD': 'asia',
+    'BT': 'asia', 'BN': 'asia', 'KH': 'asia', 'CN': 'asia', 'GE': 'asia',
+    'HK': 'asia', 'IN': 'asia', 'ID': 'asia', 'JP': 'asia', 'KZ': 'asia',
+    'KP': 'asia', 'KR': 'asia', 'KG': 'asia', 'LA': 'asia', 'MO': 'asia',
+    'MY': 'asia', 'MV': 'asia', 'MN': 'asia', 'MM': 'asia', 'NP': 'asia',
+    'PK': 'asia', 'PH': 'asia', 'SG': 'asia', 'LK': 'asia', 'TW': 'asia',
+    'TJ': 'asia', 'TH': 'asia', 'TL': 'asia', 'TM': 'asia', 'UZ': 'asia',
+    'VN': 'asia',
+
+    // North America (3 countries)
+    'CA': 'north_america', 'MX': 'north_america', 'US': 'north_america',
+
+    // Central America & Caribbean
+    'AG': 'south_america', 'BS': 'south_america', 'BB': 'south_america', 'BZ': 'south_america',
+    'CR': 'south_america', 'CU': 'south_america', 'CW': 'south_america', 'DM': 'south_america',
+    'DO': 'south_america', 'SV': 'south_america', 'GD': 'south_america', 'GT': 'south_america',
+    'HT': 'south_america', 'HN': 'south_america', 'JM': 'south_america', 'NI': 'south_america',
+    'PA': 'south_america', 'KN': 'south_america', 'LC': 'south_america', 'VC': 'south_america',
+    'TT': 'south_america',
+
+    // South America (12 countries)
+    'AR': 'south_america', 'BO': 'south_america', 'BR': 'south_america', 'CL': 'south_america',
+    'CO': 'south_america', 'EC': 'south_america', 'GF': 'south_america', 'GY': 'south_america',
+    'PY': 'south_america', 'PE': 'south_america', 'SR': 'south_america', 'UY': 'south_america',
+    'VE': 'south_america',
+
+    // Africa (20 countries - representative selection)
+    'DZ': 'africa', 'AO': 'africa', 'BJ': 'africa', 'BW': 'africa', 'BF': 'africa',
+    'BI': 'africa', 'CM': 'africa', 'CV': 'africa', 'CF': 'africa', 'TD': 'africa',
+    'KM': 'africa', 'CG': 'africa', 'CD': 'africa', 'CI': 'africa', 'DJ': 'africa',
+    'EG': 'africa', 'GQ': 'africa', 'ER': 'africa', 'ET': 'africa', 'GA': 'africa',
+    'GM': 'africa', 'GH': 'africa', 'GN': 'africa', 'GW': 'africa', 'KE': 'africa',
+    'LS': 'africa', 'LR': 'africa', 'LY': 'africa', 'MG': 'africa', 'MW': 'africa',
+    'ML': 'africa', 'MR': 'africa', 'MU': 'africa', 'MA': 'africa', 'MZ': 'africa',
+    'NA': 'africa', 'NE': 'africa', 'NG': 'africa', 'RW': 'africa', 'ST': 'africa',
+    'SN': 'africa', 'SC': 'africa', 'SL': 'africa', 'SO': 'africa', 'ZA': 'africa',
+    'SS': 'africa', 'SD': 'africa', 'SZ': 'africa', 'TZ': 'africa', 'TG': 'africa',
+    'TN': 'africa', 'UG': 'africa', 'ZM': 'africa', 'ZW': 'africa',
+
+    // Oceania (5 countries)
+    'AU': 'oceania', 'FJ': 'oceania', 'KI': 'oceania', 'MH': 'oceania', 'FM': 'oceania',
+    'NR': 'oceania', 'NZ': 'oceania', 'PW': 'oceania', 'PG': 'oceania', 'WS': 'oceania',
+    'SB': 'oceania', 'TO': 'oceania', 'TV': 'oceania', 'VU': 'oceania',
+
+    // Middle East (5 countries - separate from Asia for geopolitical clarity)
+    'IQ': 'middle_east', 'IL': 'middle_east', 'JO': 'middle_east', 'KW': 'middle_east',
+    'LB': 'middle_east', 'OM': 'middle_east', 'PS': 'middle_east', 'QA': 'middle_east',
+    'SA': 'middle_east', 'SY': 'middle_east', 'TR': 'middle_east', 'AE': 'middle_east',
+    'YE': 'middle_east', 'IR': 'middle_east'
+};
+
+// Region color scales (each region has multiple shades)
+const regionColorScales = {
+    'europe': d3.scaleOrdinal(['#3498db', '#5dade2', '#85c1e9', '#aed6f1', '#2874a6', '#1f618d']),
+    'asia': d3.scaleOrdinal(['#27ae60', '#52be80', '#82e0aa', '#abebc6', '#1e8449', '#186a3b']),
+    'north_america': d3.scaleOrdinal(['#e74c3c', '#ec7063', '#f1948a', '#f5b7b1']),
+    'south_america': d3.scaleOrdinal(['#8e44ad', '#a569bd', '#bb8fce', '#d2b4de', '#7d3c98', '#6c3483']),
+    'africa': d3.scaleOrdinal(['#e67e22', '#f39c12', '#f8b739', '#fad7a0', '#d68910', '#b9770e']),
+    'oceania': d3.scaleOrdinal(['#16a085', '#48c9b0', '#76d7c4', '#a3e4d7']),
+    'middle_east': d3.scaleOrdinal(['#a04000', '#ba6832', '#d49464', '#edc2a0'])
+};
+
+function getCountryColor(countryId) {
+    const region = regionMapping[countryId] || 'europe'; // Default to Europe if not found
+    const regionScale = regionColorScales[region];
+    return regionScale(countryId);
+}
 
 // ============================================================================
 // DATA LOADING
@@ -30,7 +118,7 @@ async function loadData() {
         // Initialize visualizations
         initNetwork();
         initRanking();
-        initTemporal();
+        initTemporalMetrics();
         initControls();
 
     } catch (error) {
@@ -128,7 +216,7 @@ function updateNetwork() {
 
     node.append('circle')
         .attr('r', d => nodeSizeScale(d.weighted_degree))
-        .attr('fill', d => colorScale(d.community));
+        .attr('fill', d => getCountryColor(d.id));
 
     node.append('text')
         .attr('dy', 4)
@@ -266,7 +354,7 @@ function updateRanking() {
         .attr('y', d => yScale(d.id))
         .attr('width', d => xScale(d[currentCentrality]))
         .attr('height', yScale.bandwidth())
-        .attr('fill', d => colorScale(d.community));
+        .attr('fill', d => getCountryColor(d.id));
 
     // Labels
     g.selectAll('text')
@@ -289,7 +377,7 @@ function updateRanking() {
 // VIS-3A: TEMPORAL METRICS
 // ============================================================================
 
-function initTemporal() {
+function initTemporalMetrics() {
     const metrics = ['density', 'modularity', 'num_communities', 'avg_clustering'];
     const years = data.metadata.years;
 
@@ -302,7 +390,296 @@ function initTemporal() {
         }))
     }));
 
-    const container = d3.select('#temporal-svg');
+    const container = d3.select('#temporal-metrics-svg');
+    const margin = {top: 20, right: 20, bottom: 30, left: 50};
+    const width = container.node().clientWidth - margin.left - margin.right;
+    const height = container.node().clientHeight - margin.top - margin.bottom;
+
+    container.selectAll('*').remove();
+
+    const g = container.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Small multiples layout (2x2 grid)
+    const cellWidth = width / 2 - 10;
+    const cellHeight = height / 2 - 10;
+
+    temporalData.forEach((d, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const offsetX = col * (cellWidth + 10);
+        const offsetY = row * (cellHeight + 10);
+
+        const cell = g.append('g')
+            .attr('transform', `translate(${offsetX},${offsetY})`);
+
+        // Scales
+        const xScale = d3.scaleLinear()
+            .domain(d3.extent(years))
+            .range([0, cellWidth]);
+
+        const yScale = d3.scaleLinear()
+            .domain(d3.extent(d.values, v => v.value))
+            .range([cellHeight, 0])
+            .nice();
+
+        // Line
+        const line = d3.line()
+            .x(v => xScale(v.year))
+            .y(v => yScale(v.value));
+
+        cell.append('path')
+            .datum(d.values)
+            .attr('fill', 'none')
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', 2)
+            .attr('d', line);
+
+        // Axes
+        cell.append('g')
+            .attr('transform', `translate(0,${cellHeight})`)
+            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')));
+
+        cell.append('g')
+            .call(d3.axisLeft(yScale).ticks(4));
+
+        // Title
+        cell.append('text')
+            .attr('x', cellWidth / 2)
+            .attr('y', -5)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '12px')
+            .attr('font-weight', 'bold')
+            .text(d.metric.replace(/_/g, ' '));
+    });
+}
+
+// ============================================================================
+// VIS-3B: SLOPEGRAPH
+// ============================================================================
+
+function prepareRankData(startYear, endYear, metric, topN) {
+    // Get data for both years
+    const startYearStr = String(startYear);
+    const endYearStr = String(endYear);
+
+    const startData = data.temporal[startYearStr];
+    const endData = data.temporal[endYearStr];
+
+    // Sort and rank for start year
+    const startSorted = [...startData.nodes]
+        .sort((a, b) => b[metric] - a[metric])
+        .map((node, index) => ({
+            country: node.id,
+            rank: index + 1,
+            value: node[metric]
+        }));
+
+    // Sort and rank for end year
+    const endSorted = [...endData.nodes]
+        .sort((a, b) => b[metric] - a[metric])
+        .map((node, index) => ({
+            country: node.id,
+            rank: index + 1,
+            value: node[metric]
+        }));
+
+    // Create lookup maps
+    const startMap = new Map(startSorted.map(d => [d.country, d]));
+    const endMap = new Map(endSorted.map(d => [d.country, d]));
+
+    // Get top-N countries from both years (union)
+    const topStartCountries = startSorted.slice(0, topN).map(d => d.country);
+    const topEndCountries = endSorted.slice(0, topN).map(d => d.country);
+    const allTopCountries = new Set([...topStartCountries, ...topEndCountries]);
+
+    // Prepare rank comparison data
+    const rankData = Array.from(allTopCountries).map(country => {
+        const startRank = startMap.get(country)?.rank || 999;
+        const endRank = endMap.get(country)?.rank || 999;
+        const startValue = startMap.get(country)?.value || 0;
+        const endValue = endMap.get(country)?.value || 0;
+
+        return {
+            country,
+            startRank,
+            endRank,
+            rankChange: startRank - endRank, // Positive = improved (moved up)
+            startValue,
+            endValue,
+            direction: startRank < endRank ? 'worsened' : (startRank > endRank ? 'improved' : 'unchanged')
+        };
+    });
+
+    // Sort by start rank for display
+    rankData.sort((a, b) => a.startRank - b.startRank);
+
+    return rankData;
+}
+
+function initSlopegraph() {
+    const container = d3.select('#slopegraph-svg');
+    const width = container.node().clientWidth;
+    const height = container.node().clientHeight;
+
+    container
+        .attr('width', width)
+        .attr('height', height);
+
+    updateSlopegraph();
+}
+
+function updateSlopegraph() {
+    const container = d3.select('#slopegraph-svg');
+    const width = container.node().clientWidth;
+    const height = container.node().clientHeight;
+
+    const margin = {top: 60, right: 120, bottom: 20, left: 120};
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+
+    // Prepare data
+    const rankData = prepareRankData(2010, 2018, temporalCentrality, temporalTopN);
+
+    // Clear previous content
+    container.selectAll('*').remove();
+
+    const g = container.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Y-Scale (rank position, 1 = top)
+    const yScale = d3.scaleLinear()
+        .domain([1, Math.max(...rankData.map(d => Math.max(d.startRank, d.endRank)))])
+        .range([0, plotHeight]);
+
+    // Line thickness scale (based on absolute rank change)
+    const thicknessScale = d3.scaleLinear()
+        .domain([0, d3.max(rankData, d => Math.abs(d.rankChange))])
+        .range([1, 4]);
+
+    // Color scale for direction
+    const directionColor = {
+        'improved': '#27ae60',   // Green
+        'worsened': '#e74c3c',   // Red
+        'unchanged': '#95a5a6'   // Gray
+    };
+
+    // Column headers
+    g.append('text')
+        .attr('x', 0)
+        .attr('y', -30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('2010');
+
+    g.append('text')
+        .attr('x', plotWidth)
+        .attr('y', -30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .text('2018');
+
+    // Draw lines
+    const lines = g.selectAll('.slope-line')
+        .data(rankData)
+        .join('line')
+        .attr('class', 'slope-line')
+        .attr('x1', 0)
+        .attr('y1', d => yScale(d.startRank))
+        .attr('x2', plotWidth)
+        .attr('y2', d => yScale(d.endRank))
+        .attr('stroke', d => directionColor[d.direction])
+        .attr('stroke-width', d => thicknessScale(Math.abs(d.rankChange)))
+        .attr('stroke-opacity', 0.6)
+        .on('mouseover', showSlopeTooltip)
+        .on('mouseout', hideSlopeTooltip)
+        .style('cursor', 'pointer');
+
+    // Left labels (2010)
+    g.selectAll('.label-left')
+        .data(rankData)
+        .join('text')
+        .attr('class', 'label-left')
+        .attr('x', -10)
+        .attr('y', d => yScale(d.startRank))
+        .attr('dy', '0.35em')
+        .attr('text-anchor', 'end')
+        .attr('font-size', '11px')
+        .text(d => `${d.startRank}. ${d.country}`);
+
+    // Right labels (2018)
+    g.selectAll('.label-right')
+        .data(rankData)
+        .join('text')
+        .attr('class', 'label-right')
+        .attr('x', plotWidth + 10)
+        .attr('y', d => yScale(d.endRank))
+        .attr('dy', '0.35em')
+        .attr('text-anchor', 'start')
+        .attr('font-size', '11px')
+        .text(d => `${d.endRank}. ${d.country}`);
+}
+
+// Slopegraph tooltip functions
+function showSlopeTooltip(event, d) {
+    // Amplify line width on hover
+    d3.select(event.currentTarget)
+        .attr('stroke-width', function() {
+            return parseFloat(d3.select(this).attr('stroke-width')) * 2;
+        })
+        .attr('stroke-opacity', 1);
+
+    // Show tooltip
+    const changeSymbol = d.rankChange > 0 ? '↑' : (d.rankChange < 0 ? '↓' : '−');
+    const changeClass = d.direction === 'improved' ? 'positive' : (d.direction === 'worsened' ? 'negative' : 'neutral');
+
+    const tooltip = d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px')
+        .html(`
+            <strong>${d.country}</strong><br>
+            <div style="margin-top: 5px;">
+                <span style="color: #aaa;">Rank 2010:</span> ${d.startRank}<br>
+                <span style="color: #aaa;">Rank 2018:</span> ${d.endRank}<br>
+                <span style="color: #aaa;">Change:</span> <span class="${changeClass}">${Math.abs(d.rankChange)} ${changeSymbol}</span><br>
+            </div>
+            <div style="margin-top: 5px; border-top: 1px solid #555; padding-top: 5px;">
+                <span style="color: #aaa;">Centrality 2010:</span> ${d.startValue.toFixed(3)}<br>
+                <span style="color: #aaa;">Centrality 2018:</span> ${d.endValue.toFixed(3)}<br>
+                <span style="color: #aaa;">Δ Centrality:</span> ${(d.endValue - d.startValue).toFixed(3)}
+            </div>
+        `);
+}
+
+function hideSlopeTooltip(event) {
+    // Reset line width
+    d3.select(event.currentTarget)
+        .attr('stroke-width', function() {
+            return parseFloat(d3.select(this).attr('stroke-width')) / 2;
+        })
+        .attr('stroke-opacity', 0.6);
+
+    // Remove tooltip
+    d3.selectAll('.tooltip').remove();
+}
+
+function initTemporalMetrics2() {
+    // Initialize second instance of temporal metrics for temporal tab
+    const metrics = ['density', 'modularity', 'num_communities', 'avg_clustering'];
+    const years = data.metadata.years;
+
+    const temporalData = metrics.map(metric => ({
+        metric,
+        values: years.map(year => ({
+            year,
+            value: data.temporal[year].metrics[metric]
+        }))
+    }));
+
+    const container = d3.select('#temporal-metrics-svg-2');
     const margin = {top: 20, right: 20, bottom: 30, left: 50};
     const width = container.node().clientWidth - margin.left - margin.right;
     const height = container.node().clientHeight - margin.top - margin.bottom;
@@ -370,7 +747,43 @@ function initTemporal() {
 // CONTROLS
 // ============================================================================
 
+function switchTab(tabName) {
+    // Update global state
+    currentTab = tabName;
+
+    // Update tab buttons
+    d3.selectAll('.tab-button')
+        .classed('active', false)
+        .attr('aria-selected', false);
+
+    d3.select(`.tab-button[data-tab="${tabName}"]`)
+        .classed('active', true)
+        .attr('aria-selected', true);
+
+    // Update tab content
+    d3.selectAll('.tab-content')
+        .classed('active', false);
+
+    d3.select(`#tab-${tabName}`)
+        .classed('active', true);
+
+    // Lazy initialization for slopegraph
+    if (tabName === 'temporal' && !slopegraphInitialized) {
+        initSlopegraph();
+        initTemporalMetrics2(); // Initialize second temporal metrics view
+        slopegraphInitialized = true;
+    }
+}
+
 function initControls() {
+    // Tab switching
+    d3.selectAll('.tab-button').on('click', function() {
+        const tabName = d3.select(this).attr('data-tab');
+        if (!this.disabled) {
+            switchTab(tabName);
+        }
+    });
+
     // Time slider
     d3.select('#time-slider').on('input', function() {
         const value = +this.value;
@@ -410,6 +823,21 @@ function initControls() {
         d3.select('#weight-slider').property('value', 1).dispatch('input');
         d3.selectAll('.node').classed('highlighted dimmed', false);
         d3.selectAll('.link').classed('highlighted dimmed', false);
+    });
+
+    // Temporal tab controls
+    d3.select('#temporal-centrality-selector').on('change', function() {
+        temporalCentrality = this.value;
+        if (slopegraphInitialized) {
+            updateSlopegraph();
+        }
+    });
+
+    d3.select('#temporal-topn-selector').on('change', function() {
+        temporalTopN = +this.value;
+        if (slopegraphInitialized) {
+            updateSlopegraph();
+        }
     });
 }
 

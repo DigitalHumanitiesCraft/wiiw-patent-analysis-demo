@@ -241,29 +241,50 @@ Basierend auf dieser Exploration:
 
 **Frontend:** [index.html](index.html) (GitHub Pages)
 
-Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsnetzwerks mit:
+Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsnetzwerks mit 3-Tab-Navigation:
 
-**Features:**
+**Tab 1: Netzwerk-Analyse**
 - **Force-Directed Network** (VIS-1A): 110 Länder, ~5,751 internationale Kooperationen
-  - Node Size = Weighted Degree, Color = Community (Louvain), Zoom/Pan, Drag
-  - Tooltips mit Centrality-Metriken
+  - Node Size = Weighted Degree, Color = Region (7 geografische Regionen)
+  - Zoom/Pan, Drag, Tooltips mit 4 Centrality-Metriken
   - Ego-Network Highlighting (Click auf Node)
+  - Edge Weight Filter (Schwellenwert 1-14)
 - **Country Ranking** (VIS-1B): Top-N Bar Chart (10/20/50/All)
   - 4 Centrality-Metriken wählbar: Degree, Betweenness, Closeness, Eigenvector
+  - Region-basierte Farbkodierung
 - **Temporal Metrics** (VIS-3A): Small Multiples (2x2 Grid)
   - Density, Modularity, Num Communities, Avg Clustering (2010-2018)
-- **Time Slider**: Wechsel zwischen Jahren (2010-2018) und kumulativer Ansicht
-- **Edge Weight Filter**: Reduziert Visual Clutter (Schwellenwert 1-14)
-- **Responsive Design**: Desktop/Tablet/Mobile
+- **Controls**: Time Slider (2010-2018 + kumulativ), Centrality Selector, Top-N Selector, Edge Weight Filter
+
+**Tab 2: Temporale Entwicklung**
+- **Slopegraph** (VIS-3B): Rank Changes 2010 → 2018
+  - Line Color: Grün = Improved, Rot = Worsened, Grau = Unchanged
+  - Line Thickness proportional zu abs(ΔRank)
+  - Tooltips mit Rank 2010/2018, ΔRank, Centrality 2010/2018, Δ Centrality
+  - Centrality Selector (4 Metriken), Top-N Selector (10/20/50)
+- **Temporal Metrics** (VIS-3A): Small Multiples (wiederverwendet)
+
+**Tab 3: Bridge-Firmen** (Placeholder)
+- Wartet auf Firmenebene-Daten (US-04)
 
 **Technologie:**
-- d3.js v7 (Force Simulation, Data Join, Scales, Zoom)
-- CSS Grid + Flexbox (70/30 Layout)
-- Vanilla JavaScript (ES6+)
+- d3.js v7 (Force Simulation, Data Join, Scales, Zoom, Slopegraph)
+- CSS Grid + Flexbox (70/30 Layout), Tab-Navigation (CSS-only)
+- Vanilla JavaScript (ES6+), Lazy Initialization
 
 **Datengrundlage:**
 - `data/country_network.json` (7.2 MB, 9 Jahre + kumulativ)
 - Vollständige Netzwerkmetriken (Centrality, Communities, Global Metrics)
+
+**Region-basierte Farbkodierung:**
+- Europa (Blau), Asien (Grün), Nordamerika (Rot), Süd-/Mittelamerika (Violett)
+- Afrika (Orange), Ozeanien (Türkis), Naher Osten (Braun)
+- Ersetzt Community-basierte Farben (Modularity 0.010 statistisch bedeutungslos)
+
+**Code-Statistiken:**
+- docs/index.html: 143 Zeilen
+- docs/styles.css: 315 Zeilen
+- docs/app.js: 780 Zeilen
 
 **⚠️ Hinweis:** Die Visualisierung basiert auf synthetischen Daten mit bekannten Artefakten (siehe unten). Strukturelle Eigenschaften (hohe Dichte, niedrige Modularity) sind nicht repräsentativ für reale Patent-Netzwerke.
 
