@@ -88,6 +88,4 @@ Details: [knowledge/CLAUDE.md](knowledge/CLAUDE.md)
 
 ## Hinweise
 
-Dies ist ein **synthetischer Datensatz** für Cloud-basierte Entwicklung. Echte Daten verbleiben lokal.
-
-Alle Analysen sind reproduzierbar. Skripte dokumentieren ihre Abhängigkeiten und Verwendung.
+Dies ist ein **synthetischer Datensatz**.

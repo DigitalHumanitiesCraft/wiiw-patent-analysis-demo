@@ -230,3 +230,71 @@ Nach Abschluss der Länder-Aggregation (Session 4) erfolgte systematische Design
 - Weitere Backend-Metriken implementieren (Betweenness, Closeness, Eigenvector für US-05, Path Length/Assortativity für US-07)
 - JSON re-exportieren mit vollständigen Metriken
 - Dann Frontend-Implementation starten
+
+## 2026-01-12 (Session 5 Fortsetzung): Backend-Metriken Komplettierung
+
+Vervollständigung aller Netzwerkmetriken aus US-05 und US-07 vor Frontend-Implementation. Entscheidung für Backend-first Workflow getroffen.
+
+**Implementation:**
+- `aggregate_country_network.py` erweitert um 5 fehlende Metriken
+- `calculate_degree_centrality()` → `calculate_centrality_metrics()` (Rename + 3 neue Metriken)
+- Betweenness Centrality: Gewichtet + normalisiert, O(n*m) Komplexität
+- Closeness Centrality: `distance='weight'` Parameter (höheres Gewicht = kürzere Distanz)
+- Eigenvector Centrality: Mit Try/Except-Fallback (dichte Netzwerke konvergieren schwer)
+- Average Path Length: Nur bei connected graphs, weighted distances
+- Assortativity Coefficient: Degree-basiert, misst Homophilie
+
+**Technische Entscheidungen:**
+- Empty-Graph Edge Cases: Alle Funktionen geben konsistente Defaults zurück
+- Eigenvector Convergence: Fallback zu Degree Centrality bei Non-Convergence
+- Average Path Length: `None` bei disconnected graphs (conditional calculation)
+- Assortativity: Try/Except für degenerate graphs
+- Console Output: Erweitert um neue Metriken (Avg Path Length, Assortativity)
+
+**Ergebnisse (Länderebene, kumulativ 2010-2018):**
+- 110 Länder, 5,829 Kanten, Dichte: 0.972 (fast vollständig verbunden)
+- Average Path Length: 69.14 (gewichtete Distanz, sehr hoch wegen weight-Interpretation)
+- Assortativity: -0.129 (disassortativ, high-degree nodes verbinden mit low-degree nodes)
+- 6 Communities, Modularity: 0.016 (niedrig, erwartbar bei 97% Dichte)
+- Alle Jahre: Avg Path Length 4.4-4.7, Assortativity -0.09 bis -0.10 (konsistent)
+
+**JSON-Export (docs/data/country_network.json):**
+- Dateigröße: 7.3 MB (vorher 7.1 MB, +2.8% durch 3 neue Node-Felder)
+- Node-Objekte: +3 Felder (betweenness_centrality, closeness_centrality, eigenvector_centrality)
+- Global Metrics: +2 Felder (avg_path_length, assortativity)
+- Vollständig abwärtskompatibel (nur Erweiterung, keine Änderungen)
+- Alle 9 Jahre + kumulativ mit vollständigen Metriken
+
+**Validierungen:**
+- JSON-Struktur: Alle erforderlichen Felder vorhanden ✓
+- Node keys: 8 Felder (id, degree, weighted_degree, degree_centrality, betweenness, closeness, eigenvector, community) ✓
+- Global keys: 9 Felder (nodes, edges, density, clustering, transitivity, connected, components, path_length, assortativity) ✓
+- Centrality-Werte: Alle in [0, 1] Range (normalisiert) ✓
+- Assortativity: In [-1, 1] Range ✓
+- Weight-Summe: 539,543 unverändert ✓
+
+**Code-Änderungen:**
+- `scripts/aggregate_country_network.py`: 4 Funktionen modifiziert, 378 → 436 Zeilen (+58 Zeilen)
+- Keine neuen Dependencies (nur NetworkX Standard-Funktionen)
+- Runtime-Increase: +10-15 Sekunden (von ~10s auf ~20-25s) - Betweenness/Closeness sind rechenintensiv
+
+**User Stories aktualisiert:**
+- US-05: "Teilweise" → "Abgeschlossen (alle Centrality-Metriken für Länderebene)"
+- US-07: "Abgeschlossen (Density, Clustering...)" → "Abgeschlossen (alle Global-Metriken)"
+
+**Learnings:**
+- Backend-first Workflow vermeidet Frontend-Iterationen bei Datenänderungen
+- Eigenvector Centrality braucht robuste Error-Handling bei dichten Netzwerken
+- Closeness Centrality mit `distance='weight'` ist konzeptionell korrekt für Kooperationsgewichte
+- Assortativity zeigt strukturelle Muster (disassortativ = diverse Verbindungen)
+- Average Path Length interpretiert Gewichte als Distanzen (hohe Werte bei weight-as-distance Semantik)
+- F-String conditional formatting benötigt separate Variablen (nicht inline `.3f if ... else`)
+- JSON-Dateigröße (+200 KB) bleibt akzeptabel für GitHub Pages (<10 MB)
+- NetworkX-Performance für 110 Knoten ausreichend (15-20s für alle Metriken + 9 Jahre)
+
+**Nächste Schritte:**
+- Frontend-Implementation starten (HTML-Skeleton, d3.js Setup)
+- VIS-1A: Force-Directed Network (Hauptvisualisierung)
+- VIS-1B: Centrality Ranking (jetzt mit Betweenness/Closeness/Eigenvector wählbar)
+- VIS-3A/3B/3C: Temporal Views mit neuen Metriken (Path Length, Assortativity im Small Multiples)
+- design.md als Spezifikation verwenden

@@ -92,7 +92,7 @@ Akzeptanzkriterien:
 - Export als Tabelle (CSV)
 - Top-10-Ranking pro Metrik
 
-Status: Teilweise abgeschlossen (Degree Centrality für Länderebene in JSON, Betweenness/Eigenvector/Closeness offen)
+Status: Abgeschlossen (Länderebene: Alle Centrality-Metriken in JSON - Degree, Betweenness, Closeness, Eigenvector, gewichtet + normalisiert. Firmenebene offen, siehe US-04)
 
 ---
 
@@ -120,7 +120,7 @@ Akzeptanzkriterien:
 - Zeitliche Entwicklung als Tabelle
 - Interpretation im Kontext von Patentkooperationen
 
-Status: Abgeschlossen (Density, Clustering, Transitivity, Konnektivität in JSON, Path Length/Assortativity offen)
+Status: Abgeschlossen (Alle Metriken in JSON: Density, Clustering, Transitivity, Konnektivität, Average Path Length, Assortativity - jährlich + kumulativ)
 
 ---
 

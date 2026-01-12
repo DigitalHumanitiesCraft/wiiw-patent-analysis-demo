@@ -25,13 +25,53 @@ import community.community_louvain as louvain
 # HELPER FUNCTIONS
 # ================================================================================
 
-def calculate_degree_centrality(G):
-    """Berechnet gewichtete und ungewichtete Degree Centrality."""
-    return {
+def calculate_centrality_metrics(G):
+    """Berechnet alle Zentralitätsmaße (Degree, Betweenness, Closeness, Eigenvector)."""
+
+    # Empty graph edge case
+    if G.number_of_nodes() == 0:
+        return {
+            'degree': {},
+            'weighted_degree': {},
+            'degree_centrality': {},
+            'betweenness_centrality': {},
+            'closeness_centrality': {},
+            'eigenvector_centrality': {}
+        }
+
+    result = {
         'degree': dict(G.degree()),                           # Ungewichtet
         'weighted_degree': dict(G.degree(weight='weight')),   # Gewichtet
         'degree_centrality': nx.degree_centrality(G)          # Normalisiert
     }
+
+    # Betweenness Centrality (weighted, normalized)
+    result['betweenness_centrality'] = nx.betweenness_centrality(
+        G,
+        weight='weight',
+        normalized=True
+    )
+
+    # Closeness Centrality (weighted)
+    result['closeness_centrality'] = nx.closeness_centrality(
+        G,
+        distance='weight'  # Uses edge weights as distances
+    )
+
+    # Eigenvector Centrality (weighted)
+    try:
+        result['eigenvector_centrality'] = nx.eigenvector_centrality(
+            G,
+            weight='weight',
+            max_iter=1000,
+            tol=1e-06
+        )
+    except nx.PowerIterationFailedConvergence:
+        # Fallback: Use degree centrality if eigenvector doesn't converge
+        print(f"  [WARNING] Eigenvector centrality did not converge, using degree centrality as fallback")
+        result['eigenvector_centrality'] = result['degree_centrality'].copy()
+
+    return result
 
 
 def detect_communities(G):
@@ -56,6 +96,8 @@ def detect_communities(G):
 
 def calculate_global_metrics(G):
     """Globale Netzwerk-Metriken."""
+
+    # Empty graph edge case
     if G.number_of_nodes() == 0:
         return {
             'num_nodes': 0,
@@ -64,10 +106,12 @@ def calculate_global_metrics(G):
             'avg_clustering': 0.0,
             'transitivity': 0.0,
             'is_connected': False,
-            'num_components': 0
+            'num_components': 0,
+            'avg_path_length': None,
+            'assortativity': None
         }
 
-    return {
+    result = {
         'num_nodes': G.number_of_nodes(),
         'num_edges': G.number_of_edges(),
         'density': nx.density(G),
@@ -76,6 +120,21 @@ def calculate_global_metrics(G):
         'is_connected': nx.is_connected(G),
         'num_components': len(list(nx.connected_components(G)))
     }
+
+    # Average Path Length (only if connected)
+    if result['is_connected']:
+        result['avg_path_length'] = nx.average_shortest_path_length(G, weight='weight')
+    else:
+        result['avg_path_length'] = None
+
+    # Assortativity Coefficient (degree-based)
+    try:
+        result['assortativity'] = nx.degree_assortativity_coefficient(G)
+    except:
+        # Can fail for degenerate graphs
+        result['assortativity'] = None
+
+    return result
 
 
 def build_json_export(yearly_graphs, yearly_metrics, G_cumulative, cumulative_metrics):
@@ -90,6 +149,9 @@ def build_json_export(yearly_graphs, yearly_metrics, G_cumulative, cumulative_me
                 'degree': centrality_data['degree'].get(node, 0),
                 'weighted_degree': centrality_data['weighted_degree'].get(node, 0.0),
                 'degree_centrality': centrality_data['degree_centrality'].get(node, 0.0),
+                'betweenness_centrality': centrality_data['betweenness_centrality'].get(node, 0.0),
+                'closeness_centrality': centrality_data['closeness_centrality'].get(node, 0.0),
+                'eigenvector_centrality': centrality_data['eigenvector_centrality'].get(node, 0.0),
                 'community': communities_data['partition'].get(node, -1)
             })
 
@@ -256,31 +318,39 @@ print("Berechne Metriken für jedes Jahr...")
 yearly_metrics = {}
 for year, G in yearly_graphs.items():
     yearly_metrics[year] = {
-        'centrality': calculate_degree_centrality(G),
+        'centrality': calculate_centrality_metrics(G),
         'communities': detect_communities(G),
         'global': calculate_global_metrics(G)
     }
 
     communities_info = yearly_metrics[year]['communities']
     global_info = yearly_metrics[year]['global']
+    avg_path_str = f"{global_info['avg_path_length']:.3f}" if global_info['avg_path_length'] else 'N/A'
+    assortativity_str = f"{global_info['assortativity']:.3f}" if global_info['assortativity'] else 'N/A'
     print(f"  {year}: {communities_info['num_communities']} Communities, "
           f"Modularity={communities_info['modularity']:.3f}, "
-          f"Density={global_info['density']:.3f}")
+          f"Density={global_info['density']:.3f}, "
+          f"Avg Path Length={avg_path_str}, "
+          f"Assortativity={assortativity_str}")
 
 print(f"[OK] Metriken für {len(yearly_metrics)} Jahre berechnet")
 
 # Kumulativ
 print("Berechne kumulative Metriken...")
 cumulative_metrics = {
-    'centrality': calculate_degree_centrality(G_cumulative),
+    'centrality': calculate_centrality_metrics(G_cumulative),
     'communities': detect_communities(G_cumulative),
     'global': calculate_global_metrics(G_cumulative)
 }
 
+avg_path_str_cum = f"{cumulative_metrics['global']['avg_path_length']:.3f}" if cumulative_metrics['global']['avg_path_length'] else 'N/A'
+assortativity_str_cum = f"{cumulative_metrics['global']['assortativity']:.3f}" if cumulative_metrics['global']['assortativity'] else 'N/A'
 print(f"[OK] Kumulative Metriken: "
       f"{cumulative_metrics['communities']['num_communities']} Communities, "
       f"Modularity={cumulative_metrics['communities']['modularity']:.3f}, "
-      f"Density={cumulative_metrics['global']['density']:.3f}")
+      f"Density={cumulative_metrics['global']['density']:.3f}, "
+      f"Avg Path Length={avg_path_str_cum}, "
+      f"Assortativity={assortativity_str_cum}")
 print()
 
 # ================================================================================
