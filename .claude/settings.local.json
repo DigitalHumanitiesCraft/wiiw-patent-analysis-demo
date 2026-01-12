@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd comprehensive patent network data analysis infrastructure\n\nThis commit establishes the foundational documentation and analysis scripts for the patent co-ownership network dataset.\n\nData Documentation:\n- Created detailed documentation for db_networkCoPat_fake.rds \\(137,990 patent relationships\\)\n- Documented all 6 data columns with types, statistics, and distributions\n- Verified data quality: 100% different owner pairs, 99.15% cross-border relationships\n- Clarified network structure: undirected graph with weighted edges \\(1-14\\)\n- Added analysis of temporal distribution \\(2010-2018\\) and geographic coverage \\(96 countries\\)\n\nAnalysis Scripts:\n- explore_rds.py: Exploratory data analysis with comprehensive statistics\n- verify_data.py: Data verification and quality assurance checks\n- scripts/README.md: Complete documentation of all analysis tools\n\nKey Insights:\n- 134,455-134,468 unique patent owners\n- Strongly international network \\(99.15% cross-border connections\\)\n- Balanced temporal distribution across 9 years\n- Right-skewed weight distribution \\(median: 4.0, mean: 3.91\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

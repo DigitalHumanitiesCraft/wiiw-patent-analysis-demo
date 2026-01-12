@@ -1,96 +1,92 @@
-# Datendokumentation: db_networkCoPat_fake.rds
+# data.md
 
-## Übersicht
+## Datei
 
-**Dateipfad:** `data/db_networkCoPat_fake.rds`
-**Dateigröße:** ~2.8 MB
+**Pfad:** `data/db_networkCoPat_fake.rds`
 **Format:** RDS (R Data Serialization)
-**Anzahl Datensätze:** 137,990 Zeilen
-**Anzahl Spalten:** 6
+**Größe:** ~2.8 MB
+**Zeilen:** 137,990
+**Zeitraum:** 2010–2018
 
-## Beschreibung
+Dies ist ein synthetischer Datensatz für Cloud-basierte Entwicklung. Echte Daten verbleiben lokal und werden nie in Cloud-Umgebungen hochgeladen.
 
-Diese Datei enthält ein Patent-Netzwerk mit Verbindungen zwischen verschiedenen Patent-Inhabern (Ownern). Jede Zeile repräsentiert eine gewichtete Beziehung zwischen zwei unterschiedlichen Patent-Inhabern. Die genaue Bedeutung der Beziehung (Co-Ownership, Zitation, Technologietransfer, etc.) muss aus dem Kontext oder der Datenquelle ermittelt werden.
+## Struktur
 
-## Datenstruktur
+Edge-List von Patentkooperationen zwischen Firmen.
 
-### Spalten
+| Variable | Typ | Beschreibung |
+|----------|-----|--------------|
+| `year_application` | integer | Jahr der Patentanmeldung |
+| `owner1` | character | Firmen-ID (Kooperationspartner 1) |
+| `country_1` | character | ISO2-Ländercode von owner1 |
+| `owner2` | character | Firmen-ID (Kooperationspartner 2) |
+| `country_2` | character | ISO2-Ländercode von owner2 |
+| `weight` | integer | Anzahl der Kollaborationen zwischen den Firmen in diesem Jahr |
 
-| Spalte | Datentyp | Beschreibung | Unique Values | Null-Werte |
-|--------|----------|--------------|---------------|------------|
-| `year_application` | float64 | Jahr der Patentanmeldung | 9 (2010-2018) | 0 |
-| `owner1` | object | ID des ersten Patent-Inhabers | 134,455 | 0 |
-| `country_1` | object | Land des ersten Inhabers | 96 | 0 |
-| `owner2` | object | ID des zweiten Patent-Inhabers | 134,468 | 0 |
-| `country_2` | object | Land des zweiten Inhabers | 92 | 0 |
-| `weight` | float64 | Gewichtung/Stärke der Verbindung | 14 (1-14) | 0 |
+Hinweis: Python (pyreadr) liest integer-Spalten teilweise als float64. Die Quelldefinition in R ist integer.
 
-### Zeitraum
+## Netzwerkeigenschaften
 
-- **Minimum Jahr:** 2010
-- **Maximum Jahr:** 2018
-- **Median Jahr:** 2014
-- **Durchschnitt:** 2014.0
+**Knoten:** ~134,000 eindeutige Firmen (owner IDs)
+**Kanten:** 137,990 Verbindungen
+**Typ:** Ungerichtet, gewichtet
+**Selbstverbindungen:** Keine (owner1 != owner2 in allen Zeilen)
+**Duplikate:** Keine
 
-### Gewichtung (Weight)
+## Länderverteilung
 
-- **Minimum:** 1.0
-- **Maximum:** 14.0
-- **Median:** 4.0
-- **Durchschnitt:** 3.91
-- **Verteilung:** Stark rechtsschief, die meisten Werte liegen zwischen 2-5
-- **Interpretation:** Die Gewichtung repräsentiert vermutlich die Stärke oder Intensität der Beziehung zwischen den beiden Inhabern (z.B. Anzahl gemeinsamer Patente, Häufigkeit der Zusammenarbeit, etc.)
+**Länder (owner1):** 96
+**Länder (owner2):** 92
+**Grenzüberschreitend:** 99.15% (136,823 Kanten)
+**Innerhalb eines Landes:** 0.85% (1,167 Kanten)
 
-### Länder
+## Gewichtung
 
-- **Anzahl unterschiedlicher Länder (Owner1):** 96
-- **Anzahl unterschiedlicher Länder (Owner2):** 92
-- **Grenzüberschreitende Beziehungen:** 99.15% (136,823 von 137,990)
-- **Innerhalb desselben Landes:** 0.85% (1,167 von 137,990)
-- **Top Länder (Owner1):** ID, TW, MO, FI, TR, SK, UA, SE, IN, FR
-- **Top Länder (Owner2):** AE, UY, HK, PY, CR, NO, ZW, TZ, SE, IE
-- **Verteilung:** Relativ gleichmäßig über viele Länder verteilt
+**Bereich:** 1–14
+**Median:** 4
+**Durchschnitt:** 3.91
+**Verteilung:** Rechtsschief, Schwerpunkt bei 2–5
 
-## Netzwerkstruktur
+## Aggregationsebenen
 
-- **Knoten:** Patent-Inhaber (Owner IDs) - ca. 134,455-134,468 eindeutige Inhaber
-- **Kanten:** Beziehungen zwischen Inhabern (137,990 Verbindungen)
-- **Kantengewicht:** Stärke der Beziehung (1-14)
-- **Netzwerktyp:** Ungerichtetes Netzwerk (keine duplizierten Paare gefunden)
-- **Eigenschaft:** Alle Kanten verbinden unterschiedliche Owner (keine Selbstverbindungen)
-- **Internationalität:** Stark grenzüberschreitend (99.15% internationale Verbindungen)
+Die Daten können auf zwei Ebenen analysiert werden.
 
-## Beispieldaten
+**Firmenebene (disaggregiert):** Netzwerk zwischen einzelnen Firmen. ~134,000 Knoten.
 
-```
-year_application | owner1          | country_1 | owner2          | country_2 | weight
-2013.0          | QA3470001011260 | IN        | different_owner | different | 5.0
-2011.0          | AT1341110434146 | MC        | different_owner | different | 4.0
-2017.0          | SG000849327     | JP        | different_owner | different | 4.0
+**Länderebene (aggregiert):** Summation der weights pro Länderpaar und Jahr. ~96 Knoten.
+
+## Lesen der Daten
+
+R:
+```r
+data <- readRDS("data/db_networkCoPat_fake.rds")
 ```
 
-**Hinweis:** Alle 137,990 Zeilen enthalten unterschiedliche Owner-Paare (owner1 ≠ owner2).
+Python:
+```python
+import pyreadr
+result = pyreadr.read_r("data/db_networkCoPat_fake.rds")
+df = result[None]
+```
 
-## Verwendungszweck
+## Offene Fragen
 
-Diese Daten eignen sich für:
-- Netzwerkanalyse von Patent-Inhabern und deren Beziehungen
-- Identifikation von Kooperations-Clustern und Communities
-- Internationale Innovations-Netzwerke und grenzüberschreitende Zusammenarbeit
-- Zeitliche Entwicklung von Patent-Beziehungen (2010-2018)
-- Graph-Visualisierung und Social Network Analysis (SNA)
-- Zentrale Akteure und Influencer im Patent-Netzwerk identifizieren
+**Datenmodell und Semantik**
+- Was definiert eine Kooperation? Co-Anmeldung, Co-Ownership, Zitation, Technologietransfer?
+- Ist year_application das Anmelde- oder Erteilungsjahr?
 
-## Technische Hinweise
+**Owner-IDs**
+- Woher stammt die ID-Systematik? Die Präfixe (QA, AT, SG) scheinen auf Länder hinzudeuten, aber country_1/country_2 existieren separat.
+- Sind die IDs persistent über Jahre oder können Firmen mehrere IDs haben?
 
-- Datei kann mit `pyreadr` in Python gelesen werden
-- Alternative: Laden in R mit `readRDS()`
-- Keine fehlenden Werte (vollständiger Datensatz)
-- Owner-IDs sind alphanumerisch und variieren in der Länge
+**Datenherkunft**
+- Welche Originaldatenquelle liegt zugrunde (EPO, USPTO, PATSTAT)?
+- Welche Vorverarbeitung wurde bereits durchgeführt?
 
-## Verfügbare Analyse-Skripte
+**Synthetischer Datensatz**
+- Wie wurde db_networkCoPat_fake.rds aus den Originaldaten erzeugt? Anonymisierung, Shuffling, vollständig generiert?
+- Sind die statistischen Eigenschaften (Verteilungen, Netzwerkstruktur) repräsentativ für die echten Daten?
 
-Siehe [../scripts/README.md](../scripts/README.md) für Details zu den Python-Skripten:
-
-- [scripts/explore_rds.py](../scripts/explore_rds.py) - Explorative Datenanalyse
-- [scripts/verify_data.py](../scripts/verify_data.py) - Datenverifizierung und Qualitätsprüfung
+**Aggregation**
+- Ist weight bereits pro Firmenpaar und Jahr aggregiert, oder können Duplikate existieren?
+- Wie wurde bei der Aggregation auf Länderebene mit Firmen umgegangen, die in mehreren Ländern aktiv sind?
