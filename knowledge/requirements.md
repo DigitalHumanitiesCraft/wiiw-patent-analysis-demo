@@ -153,7 +153,7 @@ Akzeptanzkriterien:
 - Erkennbare Trends
 - Rank-Vergleiche zwischen Jahren (Slopegraph)
 
-Status: Abgeschlossen (3-Tab-Navigation: Netzwerk | Temporal | Bridge-Firmen*. Time Slider koordiniert Network + Ranking Views. Temporal Metrics als Small Multiples [2x2 Grid] mit 4 Metriken. VIS-3B Slopegraph für Rank Changes 2010→2018 mit 4 Centrality-Metriken, Top-N Selector [10/20/50], Tooltips mit ΔRank und Δ Centrality. Region-basierte Farbkodierung ersetzt Community-Colors.)
+Status: Abgeschlossen (3-Tab-Navigation: Netzwerk | Temporal | Bridge-Länder. Time Slider koordiniert Network + Ranking Views. Temporal Metrics als Small Multiples [2x2 Grid] mit 4 Metriken. VIS-3B Slopegraph für Rank Changes 2010→2018 mit 4 Centrality-Metriken, Top-N Selector [10/20/50], Tooltips mit ΔRank und Δ Centrality, verbesserte Y-Spacing. VIS-4 Bridge Analysis (Betweenness Centrality Bar Chart) implementiert. Region-basierte Farbkodierung ersetzt Community-Colors.)
 
 ---
 

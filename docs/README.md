@@ -264,8 +264,13 @@ Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsne
   - Centrality Selector (4 Metriken), Top-N Selector (10/20/50)
 - **Temporal Metrics** (VIS-3A): Small Multiples (wiederverwendet)
 
-**Tab 3: Bridge-Firmen** (Placeholder)
-- Wartet auf Firmenebene-Daten (US-04)
+**Tab 3: Bridge-Länder**
+- **Bridge Analysis** (VIS-4): Top-N Bar Chart (10/20/50)
+  - Sortiert nach Betweenness Centrality (Bridge-Indikator)
+  - Horizontales Bar Chart mit Region-basierten Farben
+  - Tooltips mit Region, Betweenness, Degree, Num Partners
+  - Time Slider-gesteuert (zeigt Jahres-Snapshots oder kumulativ)
+- **Hinweis:** Firmenebene-Daten (US-04) nicht verfügbar, Länderebene als Proxy
 
 **Technologie:**
 - d3.js v7 (Force Simulation, Data Join, Scales, Zoom, Slopegraph)
@@ -282,9 +287,9 @@ Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsne
 - Ersetzt Community-basierte Farben (Modularity 0.010 statistisch bedeutungslos)
 
 **Code-Statistiken:**
-- docs/index.html: 143 Zeilen
+- docs/index.html: 165 Zeilen
 - docs/styles.css: 315 Zeilen
-- docs/app.js: 780 Zeilen
+- docs/app.js: 920 Zeilen
 
 **⚠️ Hinweis:** Die Visualisierung basiert auf synthetischen Daten mit bekannten Artefakten (siehe unten). Strukturelle Eigenschaften (hohe Dichte, niedrige Modularity) sind nicht repräsentativ für reale Patent-Netzwerke.
 

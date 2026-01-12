@@ -179,9 +179,9 @@ Folgt Shneiderman's Mantra: Overview First → Zoom and Filter → Details on De
 
 | Frage | Status | Empfehlung |
 |-------|--------|------------|
-| Bridge-Firmen Data (VIS-2) | US-04 offen | VIS-1 + VIS-3 zuerst, VIS-2 später |
-| Color Palette bei >10 Communities | Unklar | Start mit Category10, später evaluieren |
-| Animation vs. Small Multiples (VIS-3C) | Trade-off | Animation als Haupt-View, Small Multiples optional |
+| Bridge-Firmen Data (VIS-2) | ✅ Gelöst | VIS-4 mit Länderebene-Proxy implementiert (Betweenness Centrality) |
+| Color Palette bei >10 Communities | ✅ Gelöst | Region-basierte Farbpalette (7 Regionen) ersetzt Community-Colors |
+| Animation vs. Small Multiples (VIS-3C) | ✅ Gelöst | Small Multiples (VIS-3A) + Slopegraph (VIS-3B) implementiert |
 | Responsive Breakpoints | Desktop-first | Mobile zeigt nur VIS-1B + VIS-3A |
 | Accessibility | Phase 1 ohne | Später ColorBrewer-Palettes |
 | Export-Funktionen | Nice-to-have | SVG-Export für VIS-1A |

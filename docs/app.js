@@ -11,10 +11,12 @@ let currentWeightThreshold = 1;
 let currentTab = 'network'; // Current active tab
 let temporalCentrality = 'degree_centrality'; // Centrality for temporal tab
 let temporalTopN = 20;      // Top-N for temporal tab
+let bridgeTopN = 10;        // Top-N for bridge tab
 
 let simulation = null;     // Force simulation
 let svg = null;            // SVG selections
 let slopegraphInitialized = false; // Track if slopegraph has been initialized
+let bridgeInitialized = false;     // Track if bridge view has been initialized
 
 // Color scale for communities (will be set after data load)
 let colorScale = null;
@@ -534,7 +536,7 @@ function updateSlopegraph() {
     const width = container.node().clientWidth;
     const height = container.node().clientHeight;
 
-    const margin = {top: 60, right: 120, bottom: 20, left: 120};
+    const margin = {top: 60, right: 150, bottom: 40, left: 150};
     const plotWidth = width - margin.left - margin.right;
     const plotHeight = height - margin.top - margin.bottom;
 
@@ -547,9 +549,10 @@ function updateSlopegraph() {
     const g = container.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Y-Scale (rank position, 1 = top)
+    // Y-Scale (rank position, 1 = top) - with more padding
+    const maxRank = Math.max(...rankData.map(d => Math.max(d.startRank, d.endRank)));
     const yScale = d3.scaleLinear()
-        .domain([1, Math.max(...rankData.map(d => Math.max(d.startRank, d.endRank)))])
+        .domain([0.5, maxRank + 0.5])  // Add 0.5 padding on both ends
         .range([0, plotHeight]);
 
     // Line thickness scale (based on absolute rank change)
@@ -744,6 +747,148 @@ function initTemporalMetrics2() {
 }
 
 // ============================================================================
+// VIS-4: BRIDGE ANALYSIS (Betweenness Centrality)
+// ============================================================================
+
+function initBridge() {
+    const container = d3.select('#bridge-svg');
+    container.selectAll('*').remove();
+    updateBridge();
+}
+
+function updateBridge() {
+    const container = d3.select('#bridge-svg');
+    container.selectAll('*').remove();
+
+    const yearData = currentYear === 'cumulative' ? data.cumulative : data.temporal[currentYear];
+
+    // Sort by betweenness centrality and take top N
+    const sortedNodes = [...yearData.nodes]
+        .sort((a, b) => b.betweenness_centrality - a.betweenness_centrality)
+        .slice(0, bridgeTopN);
+
+    // Dimensions
+    const width = container.node().clientWidth;
+    const height = container.node().clientHeight;
+    const margin = {top: 40, right: 30, bottom: 40, left: 80};
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+
+    const g = container.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Scales
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(sortedNodes, d => d.betweenness_centrality)])
+        .range([0, plotWidth]);
+
+    const yScale = d3.scaleBand()
+        .domain(sortedNodes.map((d, i) => i))
+        .range([0, plotHeight])
+        .padding(0.2);
+
+    // Bars
+    g.selectAll('rect')
+        .data(sortedNodes)
+        .join('rect')
+        .attr('x', 0)
+        .attr('y', (d, i) => yScale(i))
+        .attr('width', d => xScale(d.betweenness_centrality))
+        .attr('height', yScale.bandwidth())
+        .attr('fill', d => getCountryColor(d.id))
+        .attr('opacity', 0.8)
+        .on('mouseover', function(event, d) {
+            d3.select(this).attr('opacity', 1);
+            showBridgeTooltip(event, d);
+        })
+        .on('mouseout', function() {
+            d3.select(this).attr('opacity', 0.8);
+            hideBridgeTooltip();
+        });
+
+    // Country labels
+    g.selectAll('.country-label')
+        .data(sortedNodes)
+        .join('text')
+        .attr('class', 'country-label')
+        .attr('x', -5)
+        .attr('y', (d, i) => yScale(i) + yScale.bandwidth() / 2)
+        .attr('dy', '0.35em')
+        .attr('text-anchor', 'end')
+        .attr('font-size', '11px')
+        .attr('fill', '#333')
+        .text(d => d.id);
+
+    // Value labels
+    g.selectAll('.value-label')
+        .data(sortedNodes)
+        .join('text')
+        .attr('class', 'value-label')
+        .attr('x', d => xScale(d.betweenness_centrality) + 5)
+        .attr('y', (d, i) => yScale(i) + yScale.bandwidth() / 2)
+        .attr('dy', '0.35em')
+        .attr('font-size', '10px')
+        .attr('fill', '#666')
+        .text(d => d.betweenness_centrality.toFixed(4));
+
+    // X-axis
+    g.append('g')
+        .attr('transform', `translate(0,${plotHeight})`)
+        .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format('.3f')));
+
+    // X-axis label
+    g.append('text')
+        .attr('x', plotWidth / 2)
+        .attr('y', plotHeight + 35)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '12px')
+        .attr('fill', '#333')
+        .text('Betweenness Centrality');
+
+    // Title
+    g.append('text')
+        .attr('x', plotWidth / 2)
+        .attr('y', -20)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .attr('fill', '#333')
+        .text(`Top ${bridgeTopN} Bridge-Länder (Betweenness Centrality)`);
+}
+
+function showBridgeTooltip(event, d) {
+    const tooltip = d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('position', 'absolute')
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px')
+        .style('opacity', 1);
+
+    const region = regionMapping[d.id] || 'europe';
+    const regionName = {
+        'europe': 'Europa',
+        'asia': 'Asien',
+        'north_america': 'Nordamerika',
+        'south_america': 'Süd-/Mittelamerika',
+        'africa': 'Afrika',
+        'oceania': 'Ozeanien',
+        'middle_east': 'Naher Osten'
+    }[region];
+
+    tooltip.html(`
+        <strong>${d.id}</strong><br/>
+        Region: ${regionName}<br/>
+        <strong>Betweenness:</strong> ${d.betweenness_centrality.toFixed(4)}<br/>
+        Degree: ${d.degree_centrality.toFixed(3)}<br/>
+        Partners: ${d.num_partners}
+    `);
+}
+
+function hideBridgeTooltip() {
+    d3.selectAll('.tooltip').remove();
+}
+
+// ============================================================================
 // CONTROLS
 // ============================================================================
 
@@ -772,6 +917,12 @@ function switchTab(tabName) {
         initSlopegraph();
         initTemporalMetrics2(); // Initialize second temporal metrics view
         slopegraphInitialized = true;
+    }
+
+    // Lazy initialization for bridge view
+    if (tabName === 'bridge' && !bridgeInitialized) {
+        initBridge();
+        bridgeInitialized = true;
     }
 }
 
@@ -837,6 +988,14 @@ function initControls() {
         temporalTopN = +this.value;
         if (slopegraphInitialized) {
             updateSlopegraph();
+        }
+    });
+
+    // Bridge tab controls
+    d3.select('#bridge-topn-selector').on('change', function() {
+        bridgeTopN = +this.value;
+        if (bridgeInitialized) {
+            updateBridge();
         }
     });
 }

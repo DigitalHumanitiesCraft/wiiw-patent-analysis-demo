@@ -21,8 +21,8 @@
                 <button class="tab-button" data-tab="temporal" role="tab" aria-selected="false" aria-controls="tab-temporal">
                     Temporale Entwicklung
                 </button>
-                <button class="tab-button" data-tab="bridge" role="tab" aria-selected="false" aria-controls="tab-bridge" disabled>
-                    Bridge-Firmen
+                <button class="tab-button" data-tab="bridge" role="tab" aria-selected="false" aria-controls="tab-bridge">
+                    Bridge-Länder
                 </button>
             </nav>
 
@@ -127,16 +127,26 @@
                 </div>
             </div>
 
-            <!-- Tab 3: Bridge-Firmen (Placeholder) -->
+            <!-- Tab 3: Bridge-Firmen -->
             <div id="tab-bridge" class="tab-content" role="tabpanel" aria-labelledby="tab-bridge">
                 <div class="placeholder-view">
-                    <h2>Bridge-Firmen Analyse</h2>
+                    <h2>Bridge-Länder Analyse</h2>
                     <p class="placeholder-text">
-                        Diese Ansicht wartet auf die Implementierung der Firmenebene-Daten (US-04).
+                        Diese Ansicht zeigt Länder mit hoher Betweenness Centrality - potenzielle "Bridge"-Positionen im Netzwerk.
                     </p>
-                    <p class="placeholder-text">
-                        Geplante Features: Identifikation von Firmen mit hohem Bridge-Potenzial basierend auf Anzahl der Partnerländer.
+                    <p class="placeholder-text" style="color: #6c757d; font-size: 0.9rem; margin-top: 1rem;">
+                        Hinweis: Firmenebene-Daten (US-04) sind nicht verfügbar. Die Analyse basiert auf Länderebene als Proxy.
                     </p>
+                    <div style="margin-top: 2rem;">
+                        <label>Top-N Bridge-Länder:
+                            <select id="bridge-topn-selector">
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </label>
+                    </div>
+                    <svg id="bridge-svg" style="width: 100%; height: 500px; margin-top: 1rem;"></svg>
                 </div>
             </div>
         </main>

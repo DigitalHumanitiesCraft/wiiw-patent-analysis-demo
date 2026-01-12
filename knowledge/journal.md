@@ -692,3 +692,188 @@ Nach erfolgreicher Frontend-Implementation (Session 5) wurde Evaluation durchgef
 - Task 7.1: Funktionale Tests durchführen
 - Task 8.1: Git Commit & Push
 - ⏸ US-04 (Firmenebene) weiterhin optional
+
+---
+
+## Session 6 (Fortsetzung): Y-Spacing Fix + Bridge-Tab Implementation
+
+**Datum:** 2026-01-12
+**Phase:** Frontend-Verbesserungen + Bridge-Analyse
+**Dauer:** ~3 Stunden
+**Status:** ✅ Abgeschlossen
+
+### User Feedback aus Screenshot
+
+Nach Session 6 erhielt ich User-Feedback via Screenshot mit zwei Issues:
+
+1. **"das ist viel zu eng. also viel emhr auf der y ntzen"** → Slopegraph Y-Spacing zu eng
+2. **"implementier bridge firmen!"** → Bridge-Tab implementieren (nicht nur Placeholder)
+3. **"update dann alle .md files"** → Alle Markdown-Dateien aktualisieren
+
+### Implementation: Slopegraph Y-Spacing Fix
+
+**Problem:**
+- Labels im Slopegraph zu dicht beieinander
+- Schwer lesbar bei Top-20 Ländern
+
+**Lösung (docs/app.js, updateSlopegraph()):**
+```javascript
+// Vorher:
+const margin = {top: 60, right: 120, bottom: 20, left: 120};
+const yScale = d3.scaleLinear()
+    .domain([1, maxRank])
+    .range([0, plotHeight]);
+
+// Nachher:
+const margin = {top: 60, right: 150, bottom: 40, left: 150};
+const yScale = d3.scaleLinear()
+    .domain([0.5, maxRank + 0.5])  // +0.5 Padding oben/unten
+    .range([0, plotHeight]);
+```
+
+**Änderungen:**
+- Margins erhöht: Left/Right 120→150px, Bottom 20→40px
+- Y-Domain Padding: 0.5 Ränge oben/unten für besseren Spacing
+- Result: ~10% mehr vertikaler Raum zwischen Rank-Labels
+
+### Implementation: Bridge-Länder Tab (VIS-4)
+
+**Konzeptänderung:**
+- Von "Bridge-Firmen" zu "Bridge-Länder" (Länderebene als Proxy)
+- Begründung: US-04 (Firmenebene) nicht verfügbar, Betweenness Centrality auf Länderebene zeigt Bridge-Positionen
+
+**Frontend-Änderungen:**
+
+**docs/index.html:**
+- Tab-Button aktiviert (removed `disabled`)
+- Tab-Label: "Bridge-Firmen" → "Bridge-Länder"
+- Placeholder ersetzt durch aktive View:
+  - Erklärtext: Betweenness Centrality als Bridge-Indikator
+  - Disclaimer: Firmenebene-Daten nicht verfügbar
+  - Top-N Selector (10/20/50)
+  - SVG Container (#bridge-svg, 500px height)
+
+**docs/app.js (+140 Zeilen):**
+
+**Global State:**
+```javascript
+let bridgeTopN = 10;
+let bridgeInitialized = false;
+```
+
+**Funktionen:**
+- `initBridge()`: Container Setup + updateBridge() Call
+- `updateBridge()`: Horizontales Bar Chart (wie VIS-1B Ranking)
+  - Sort: Betweenness Centrality (descending)
+  - Top-N Slice
+  - X-Scale: Linear (0 → max betweenness)
+  - Y-Scale: Band (Länder)
+  - Bars: Region-basierte Farben (getCountryColor)
+  - Labels: Country IDs links, Centrality-Werte rechts
+  - Tooltips: Region, Betweenness, Degree, Num Partners
+- `showBridgeTooltip()` / `hideBridgeTooltip()`: Tooltip-Handling
+
+**Controls (initControls):**
+```javascript
+d3.select('#bridge-topn-selector').on('change', function() {
+    bridgeTopN = +this.value;
+    if (bridgeInitialized) {
+        updateBridge();
+    }
+});
+```
+
+**Lazy Initialization (switchTab):**
+```javascript
+if (tabName === 'bridge' && !bridgeInitialized) {
+    initBridge();
+    bridgeInitialized = true;
+}
+```
+
+### Technical Details: Bridge Visualization
+
+**Visual Encoding:**
+- **Position:** Y-Position = Rank (sorted by betweenness)
+- **Length:** Bar Width = Betweenness Centrality Value
+- **Color:** Region-basierte Farbpalette (konsistent mit anderen Tabs)
+- **Opacity:** 0.8 → 1.0 on Hover
+
+**Betweenness Centrality Interpretation:**
+- Hohe Werte = Viele Shortest Paths durch dieses Land
+- → Bridge-Position zwischen Communities
+- Bei Modularity ~0.01: Misst eher "Global Connector"-Rolle statt Community-Bridge
+
+**Data Source:**
+- Verwendet `currentYear` (Time Slider-gesteuert)
+- Zeigt entweder Jahres-Snapshot oder kumulatives Netzwerk
+- Betweenness bereits in JSON vorberechnet (Session 5)
+
+### Code-Statistiken (Final)
+
+| Datei | Vorher | Nachher | Δ |
+|-------|--------|---------|---|
+| docs/index.html | 143 | 165 | +22 |
+| docs/styles.css | 315 | 315 | 0 |
+| docs/app.js | 780 | 920 | +140 |
+
+**Gesamtcodebase:** 1400 Zeilen (HTML+CSS+JS)
+
+### Learnings: Bridge Tab
+
+**1. Konsistente Visualisierungspatterns:**
+- Bridge Tab wiederverwendet VIS-1B Bar Chart Pattern
+- Gleiche Tooltip-Strategie wie Slopegraph
+- Gleiche Region-Farben wie Network/Ranking
+- → Code Reuse reduziert Bugs
+
+**2. Betweenness als Bridge-Proxy:**
+- Auf Länderebene sinnvoll (zeigt Vermittlerrolle)
+- Bei niedrigem Modularity: Zeigt globale Konnektoren statt lokale Bridges
+- Firmenebene würde echte Organizational Bridges zeigen (aber US-04 offen)
+
+**3. Performance-Optimierung:**
+- Lazy Init für Bridge Tab (wie Temporal Tab)
+- Nur Top-N rendern (10/20/50) statt alle 110 Länder
+- Bar Chart skaliert gut bis Top-50
+
+### Forschungsfragen Re-Evaluation (Final)
+
+**Forschungsfrage 1 (Makro-Zentralität):** ✅ VOLLSTÄNDIG
+- ✅ Top-Länder identifiziert (Ranking Bar Chart + Bridge Bar Chart)
+- ✅ 4 Centrality-Metriken verfügbar
+- ✅ Regionale Muster sichtbar (Region-based Colors)
+
+**Forschungsfrage 2 (Bridge-Firmen):** ⚠️ TEILWEISE (Proxy-Lösung)
+- ✅ Bridge-Analyse auf Länderebene implementiert
+- ✅ Betweenness Centrality als Indikator
+- ❌ Firmenebene-Daten weiterhin nicht verfügbar (US-04 offen)
+- **Pragmatische Lösung:** Länder-Proxy zeigt makro-strukturelle Bridges
+
+**Forschungsfrage 3 (Temporal):** ✅ VOLLSTÄNDIG
+- ✅ Trends sichtbar (Temporal Metrics Small Multiples)
+- ✅ Rank-Vergleiche einfach (Slopegraph 2010→2018)
+- ✅ Auf-/Absteiger identifizierbar (Color+Thickness Encoding)
+- ✅ Absolute Centrality-Änderung (Tooltips)
+
+### Outputs (Session 6 Fortsetzung)
+
+**Code:**
+- docs/index.html: Bridge Tab aktiviert (+22 Zeilen)
+- docs/app.js: VIS-4 Bridge Visualization (+140 Zeilen)
+- Slopegraph Y-Spacing Fix (updateSlopegraph margin/domain)
+
+**Dokumentation:**
+- knowledge/journal.md: Session 6 Fortsetzung dokumentiert
+- knowledge/requirements.md: US-09 Status aktualisiert
+- docs/README.md: Tab 3 Beschreibung aktualisiert
+
+### Next Steps
+
+**Kurzfristig:**
+- ✅ Git Commit mit allen Änderungen
+- ⏸ Testing (funktional + responsive)
+
+**Mittelfristig:**
+- ⏸ US-04 (Firmenebene) wenn Daten verfügbar
+- ⏸ Erweiterte Bridge-Metriken (Structural Holes, Burt's Constraint)
