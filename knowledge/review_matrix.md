@@ -1,6 +1,6 @@
 # Review Matrix: Daten & Forschungsfragen
 
-**Generiert am:** 2026-01-12T18:23:50.962955
+**Generiert am:** 2026-01-12T18:28:56.282521
 
 ---
 
@@ -23,21 +23,21 @@
 | betweenness_centrality | ✓           | [0.000, 0.029] | ✓ Ja             |
 | closeness_centrality   | ✓           | [0.013, 0.017] | ✓ Ja             |
 | eigenvector_centrality | ✓           | [0.051, 0.113] | ✓ Ja             |
-| Communities (Louvain)  | ✓           | 4 Communities  | Modularity=0.011 |
+| Communities (Louvain)  | ✓           | 5 Communities  | Modularity=0.010 |
 
 ### Forschungsfrage 3: Temporale Entwicklung
 
 |   Jahr |   Nodes |   Edges |   Density |   Communities |   Modularity |
 |-------:|--------:|--------:|----------:|--------------:|-------------:|
-|   2010 |     110 |    5147 |     0.859 |             5 |        0.047 |
-|   2011 |     110 |    5192 |     0.866 |             5 |        0.047 |
+|   2010 |     110 |    5147 |     0.859 |             5 |        0.046 |
+|   2011 |     110 |    5192 |     0.866 |             6 |        0.049 |
 |   2012 |     110 |    5189 |     0.866 |             5 |        0.046 |
-|   2013 |     110 |    5135 |     0.857 |             5 |        0.047 |
-|   2014 |     110 |    5209 |     0.869 |             6 |        0.047 |
-|   2015 |     110 |    5189 |     0.866 |             6 |        0.045 |
-|   2016 |     110 |    5174 |     0.863 |             5 |        0.048 |
-|   2017 |     110 |    5133 |     0.856 |             6 |        0.047 |
-|   2018 |     110 |    5185 |     0.865 |             5 |        0.043 |
+|   2013 |     110 |    5135 |     0.857 |             6 |        0.049 |
+|   2014 |     110 |    5209 |     0.869 |             6 |        0.044 |
+|   2015 |     110 |    5189 |     0.866 |             5 |        0.049 |
+|   2016 |     110 |    5174 |     0.863 |             5 |        0.044 |
+|   2017 |     110 |    5133 |     0.856 |             6 |        0.05  |
+|   2018 |     110 |    5185 |     0.865 |             6 |        0.045 |
 
 ## Abschnitt 3: Methodische Korrektheit
 
@@ -47,7 +47,7 @@
 | 3.2 Degree Centrality Normalisierung | Max=1.000000          | ≤ 1.0                        | ✓ Korrekt   |
 | 3.3 Network Connectivity             | Connected             | Connected (erwartet)         | ✓ Korrekt   |
 | 3.4 Weight-Verteilung                | Median=90, Mean=93.0  | Rechtsschief (Median < Mean) | ✓ Plausibel |
-| 3.5 Modularity (bei hoher Density)   | Mod=0.011, Dens=0.959 | Mod < 0.3 bei Dens > 0.8     | ✓ Plausibel |
+| 3.5 Modularity (bei hoher Density)   | Mod=0.010, Dens=0.959 | Mod < 0.3 bei Dens > 0.8     | ✓ Plausibel |
 
 ## Abschnitt 4: User Stories
 
