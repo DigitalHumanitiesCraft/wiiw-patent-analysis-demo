@@ -157,3 +157,76 @@ Implementierung von `aggregate_country_network.py`: Vollständige Aggregation de
 - Später: InfoVis-Design für 3 Visualisierungen
 - US-04: Firmenebene-Netzwerke (entscheiden: vollständig vs. Top-N-Subgraph)
 - US-08-09: Visualisierungen implementieren
+
+## 2026-01-12 (Session 5): InfoVis Design & Validation
+
+Nach Abschluss der Länder-Aggregation (Session 4) erfolgte systematische Design-Planung für Frontend-Visualisierungen unter Verwendung etablierter Information-Visualization-Frameworks.
+
+**Design-Philosophie:**
+- Research Question Driven Design statt ästhetischer Präferenzen
+- Systematische Task-Analyse mit Brehmer & Munzner Framework (2013)
+- Perception-basierte Encodings nach Cleveland & McGill (1984)
+- Shneiderman's Mantra: Overview First → Zoom/Filter → Details on Demand
+
+**Erstellung knowledge/design.md:**
+- Task-Analyse für alle 3 Forschungsfragen (Why → What → How)
+- Evaluation von 3 Design-Alternativen (All-in-One, Tab-Based, Multiple Coordinated Views)
+- Finale Entscheidung: Multiple Coordinated Views (Alternative 3)
+- Vollständige Spezifikation: Layout, Visual Encodings, Interaktionsdesign, Technologie-Stack
+- 6 Visualisierungen definiert: VIS-1A (Network), VIS-1B (Centrality Bars), VIS-3A (Temporal Metrics Small Multiples), VIS-3B (Slopegraph), VIS-3C (Animated Network), VIS-2A/2B (Bridge-Firmen, wartet auf US-04)
+
+**Screenshot-Validierung:**
+- Mockup-Screenshot gegen design.md validiert
+- Übereinstimmung: 95% (Layout, Encodings, Interaktionen)
+- Alle Design-Prinzipien erfüllt (Research-Driven, Task-Oriented, Perception-Based, Scalable, Consistent)
+- Shneiderman's Mantra vollständig implementiert
+
+**Komprimierung design.md:**
+- Von 720 Zeilen (Initial Draft) auf 208 Zeilen reduziert (71% Reduktion)
+- Vollständige Informationserhaltung durch Tabellenformat
+- Entfernung von: Referenzen (in Tabellen benannt), JSON-Code-Beispiele (kommen in Implementation), Wiederholungen, Revision History
+- Ergebnis: Kompakte, production-ready Spezifikation
+
+**Design-Entscheidungen dokumentiert:**
+- VIS-1A: Force-Directed Layout, Node size=log(Weighted Degree), Color=Community, Edge width=sqrt(weight)
+- VIS-1B: Bar Chart, Position=Degree Centrality (höchste perceptual accuracy), Top-20 default
+- VIS-3A: Small Multiples für 4 Metriken (Density, Modularity, Num Communities, Avg Clustering)
+- Time Slider: 2010-2018 + Cumulative, Play/Pause, koordiniert alle Views
+- Responsive: Desktop-first (>1200px), Tablet stackt vertikal, Mobile Fallback
+
+**Technologie-Stack definiert:**
+- Frontend: d3.js v7, Vanilla JavaScript (ES6+), CSS Grid + Flexbox
+- Daten: JSON (7.1 MB, pre-calculated, ready)
+- Performance-Ziele: <2s Load, <3s Force Simulation, 60fps Animation
+- Browser: Modern browsers (Chrome, Firefox, Safari, Edge), kein IE11
+
+**Offene Fragen dokumentiert:**
+- Bridge-Firmen Data (VIS-2): Wartet auf US-04
+- Color Palette bei >10 Communities: Start mit d3.schemeCategory10
+- Animation vs. Small Multiples: Animation als Haupt-View, Small Multiples optional
+- Responsive Breakpoints: Desktop-first, Mobile nur statische Charts
+- Accessibility: Phase 1 ohne, später ColorBrewer
+- Export-Funktionen: SVG-Export für VIS-1A (nice-to-have)
+
+**Outputs erstellt:**
+- `knowledge/design.md` (208 Zeilen, kompakt, production-ready)
+
+**Learnings:**
+- InfoVis-Frameworks (Brehmer & Munzner, Cleveland & McGill, Shneiderman) liefern objektive Design-Rationale
+- Systematische Task-Dekomposition (Why-What-How) vermeidet Over-Engineering
+- Perception-Hierarchie (Position > Length > Color) führt zu effektiveren Visualisierungen
+- Tabellenformat für Design-Specs reduziert Token-Count drastisch ohne Informationsverlust
+- Screenshot-Validierung gegen Spezifikation deckt Abweichungen früh auf
+- Multiple Coordinated Views ermöglichen Cross-Question-Insights (wichtiger als Tab-Based)
+- Small Multiples für Temporal Metrics vermeiden Dual-Axis-Konfusion
+- Design.md als separate Datei trennt Design-Rationale von research.md (Separation of Concerns)
+
+**Entscheidung für Backend-first:**
+- Komplettierung aller Metriken vor Frontend-Implementation
+- Vermeidet spätere Backend-Änderungen und JSON-Re-Exports
+- Systematischer Workflow: Data → Analysis → Visualization
+
+**Nächste Schritte:**
+- Weitere Backend-Metriken implementieren (Betweenness, Closeness, Eigenvector für US-05, Path Length/Assortativity für US-07)
+- JSON re-exportieren mit vollständigen Metriken
+- Dann Frontend-Implementation starten
