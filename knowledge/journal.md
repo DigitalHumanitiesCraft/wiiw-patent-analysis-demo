@@ -84,3 +84,76 @@ Systematische Exploration der Patentkooperationsdaten im Hinblick auf die Forsch
 - US-02: Aggregation auf Länderebene implementieren (Grundlage vorhanden)
 - US-03: Netzwerkobjekte erstellen mit NetworkX
 - Entscheidung: Firmenebene vollständig oder Top-N-Subgraph für Performance
+
+## 2026-01-12 (Session 4): Länder-Aggregation & Netzwerkanalyse (US-02, US-03, US-05-07)
+
+Implementierung von `aggregate_country_network.py`: Vollständige Aggregation der Firmendaten auf Länderebene mit NetworkX-Netzwerkobjekten, Metrik-Berechnung und JSON-Export für Frontend-Visualisierung.
+
+**Implementierte User Stories:**
+- US-02: Aggregation auf Länderebene (jährlich + kumulativ)
+- US-03: NetworkX-Netzwerkobjekte erstellen
+- US-05: Degree Centrality berechnen (gewichtet + normalisiert)
+- US-06: Community Detection (Louvain-Algorithmus)
+- US-07: Globale Netzwerkeigenschaften (Density, Clustering, Konnektivität)
+
+**Technische Umsetzung:**
+- Normalisierung der Länderpaare (undirected network: min/max-Sortierung)
+- Aggregation: 137,990 firm-level edges → 5,829 country-level edges (kumulativ), 47,122 über alle Jahre
+- 9 jährliche NetworkX-Graphs + 1 kumulatives Graph
+- Louvain Community Detection auf gewichteten Netzwerken
+- JSON-Export (7.1 MB) mit vollständiger Struktur: metadata, cumulative, temporal (2010-2018)
+
+**Netzwerk-Charakteristika (kumulativ):**
+- 110 Länder, 5,829 Kanten
+- Dichte: 0.972 (fast vollständig verbunden)
+- 6 Communities, Modularity: 0.016 (niedrig, Netzwerk sehr dicht)
+- Vollständig verbunden (1 Komponente)
+- Top-5 Länder (synthetische Daten): TW (12,049), PL (11,994), UA (11,965), HK (11,866), QA (11,860)
+
+**Temporale Entwicklung:**
+- Knoten: Stabil bei 110 über alle Jahre
+- Kanten pro Jahr: 5,196 - 5,271 (±1.4% Variation)
+- Dichte: 0.867 - 0.879 (sehr stabil)
+- Communities: 5-7 pro Jahr, Modularity: 0.050 - 0.056
+
+**JSON-Struktur für Frontend:**
+```json
+{
+  "metadata": {...},
+  "cumulative": {
+    "nodes": [{id, degree, weighted_degree, degree_centrality, community}],
+    "edges": [{source, target, weight, num_firm_pairs}],
+    "metrics": {num_nodes, density, modularity, ...}
+  },
+  "temporal": {
+    "2010": {...}, ..., "2018": {...}
+  }
+}
+```
+
+**Validierungen:**
+- Weight-Summe: 539,543 (original) = 539,543 (aggregiert) ✓
+- Länder-Anzahl: 110 in Daten = 110 in Graph ✓
+- JSON-Struktur: Alle erforderlichen Felder vorhanden ✓
+- Metadata: num_countries = 110 ✓
+
+**Outputs erstellt:**
+- `docs/data/country_network.json` (7.1 MB, vollständige Netzwerkdaten + Metriken)
+- Skript: `scripts/aggregate_country_network.py` (378 Zeilen)
+
+**Dependencies installiert:**
+- python-louvain (0.16) für Community Detection
+
+**Learnings:**
+- NetworkX-Kompatibilität: `number_of_connected_components()` → `len(list(connected_components()))`  in NetworkX 3.3
+- JSON-Export direkt aus NetworkX-Graphs effizient über Helper-Funktionen
+- Louvain auf sehr dichten Netzwerken (97% Density) liefert niedrige Modularity (0.016) - erwartbar
+- JSON-Größe (7.1 MB) akzeptabel für GitHub Pages, enthält alle 9 Jahre + kumulativ
+- Community-Struktur variiert zwischen Jahren (5-7 Communities) trotz stabiler Dichte
+- Synthetische Daten zeigen weiterhin ungewöhnliche Top-Länder (TW, PL, UA statt US, CN, DE)
+
+**Nächste Schritte:**
+- Frontend-Skeleton erstellen (HTML + JS für JSON-Loader + Console-Output)
+- Später: InfoVis-Design für 3 Visualisierungen
+- US-04: Firmenebene-Netzwerke (entscheiden: vollständig vs. Top-N-Subgraph)
+- US-08-09: Visualisierungen implementieren

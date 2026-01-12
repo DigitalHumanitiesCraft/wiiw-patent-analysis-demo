@@ -43,7 +43,7 @@ Akzeptanzkriterien:
 - Dokumentation der Aggregationslogik
 - Validierung: Summe der Gewichte bleibt erhalten
 
-Status: Offen
+Status: Abgeschlossen (siehe scripts/aggregate_country_network.py, docs/data/country_network.json)
 
 ---
 
@@ -60,7 +60,7 @@ Akzeptanzkriterien:
 
 Technologie: NetworkX (Standard), igraph optional für Vergleich
 
-Status: Offen
+Status: Abgeschlossen (siehe scripts/aggregate_country_network.py, 9 jährliche Graphs + 1 kumulativ)
 
 ---
 
@@ -92,7 +92,7 @@ Akzeptanzkriterien:
 - Export als Tabelle (CSV)
 - Top-10-Ranking pro Metrik
 
-Status: Offen
+Status: Teilweise abgeschlossen (Degree Centrality für Länderebene in JSON, Betweenness/Eigenvector/Closeness offen)
 
 ---
 
@@ -108,7 +108,7 @@ Akzeptanzkriterien:
 
 Technologie: python-louvain (primär), leidenalg (optional)
 
-Status: Offen
+Status: Abgeschlossen (Louvain für Länderebene in JSON, Modularity dokumentiert, Leiden optional offen)
 
 ---
 
@@ -120,7 +120,7 @@ Akzeptanzkriterien:
 - Zeitliche Entwicklung als Tabelle
 - Interpretation im Kontext von Patentkooperationen
 
-Status: Offen
+Status: Abgeschlossen (Density, Clustering, Transitivity, Konnektivität in JSON, Path Length/Assortativity offen)
 
 ---
 
