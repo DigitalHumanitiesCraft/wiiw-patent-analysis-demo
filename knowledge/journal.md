@@ -298,3 +298,64 @@ Vervollständigung aller Netzwerkmetriken aus US-05 und US-07 vor Frontend-Imple
 - VIS-1B: Centrality Ranking (jetzt mit Betweenness/Closeness/Eigenvector wählbar)
 - VIS-3A/3B/3C: Temporal Views mit neuen Metriken (Path Length, Assortativity im Small Multiples)
 - design.md als Spezifikation verwenden
+
+## 2026-01-12 (Session 5 Final): Self-Loop-Fix & Comprehensive Review
+
+Bugfix Self-Loops und umfassende Validierung aller Daten gegen Forschungsfragen.
+
+**Problem entdeckt:**
+- JSON-Validierung zeigte degree_centrality > 1.0 (Max: 1.018)
+- Ursache: 78 Self-Loops im aggregierten Netzwerk (country_a == country_b)
+- Self-Loops entstanden durch min/max-Sortierung bei nationalen Kooperationen (0.85% der Daten)
+
+**Fix implementiert:**
+- Nationale Kooperationen (country_1 == country_2) nach Aggregation filtern
+- 569 Self-Loops entfernt (aus 47,122 jährlichen Länderpaaren)
+- Weight-Validierung angepasst: Nur internationale Kooperationen (535,054 statt 539,543)
+- 4,489 Weight (0.83%) nationale Kooperationen exkludiert (korrekt für inter-nationales Netzwerk)
+
+**JSON-Struktur erweitert:**
+- Modularity und num_communities zu global metrics hinzugefügt
+- Jetzt 11 Global Metrics (vorher 9): num_nodes, num_edges, density, avg_clustering, transitivity, is_connected, num_components, avg_path_length, assortativity, modularity, num_communities
+
+**Validierungs-Skripte erstellt:**
+- `validate_json.py`: 10 umfassende Checks (Struktur, Wertebereiche, Konsistenz, Edges)
+- `comprehensive_review.py`: 4-Abschnitt Review-Matrix gegen Forschungsfragen
+
+**Comprehensive Review Ergebnisse:**
+- ✓ Daten-Qualität: EXZELLENT (alle Weight-Summen konsistent, keine Duplikate, Self-Loops entfernt)
+- ✓ Forschungsfragen-Alignment: SEHR GUT (2/3 vollständig, 1/3 teilweise)
+  * Forschungsfrage 1 (Makro): VOLLSTÄNDIG beantwortbar (4 Centrality-Metriken + Communities)
+  * Forschungsfrage 2 (Mikro): TEILWEISE (267k Firmen identifiziert, Netzwerk offen)
+  * Forschungsfrage 3 (Temporal): VOLLSTÄNDIG (9 Jahre, alle Metriken)
+- ✓ Methodische Korrektheit: EXZELLENT (degree_centrality ≤ 1.0, keine Self-Loops, Modularity plausibel)
+- ✓ Vollständigkeit: GUT (6/9 User Stories abgeschlossen, 67%)
+
+**Finale Netzwerk-Charakteristika (kumulativ, ohne Self-Loops):**
+- 110 Länder, 5,751 internationale Kooperationen (vorher 5,829 mit Self-Loops)
+- Dichte: 0.959 (vorher 0.972)
+- 4 Communities, Modularity: 0.011
+- Degree Centrality Range: [0.844, 1.000] ✓ Korrekt normalisiert
+- Alle Centrality-Werte in [0, 1] Range
+- Network fully connected (1 Komponente)
+- Weight-Verteilung: Median=90, Mean=93.0 (rechtsschief, erwartbar)
+
+**Outputs:**
+- knowledge/review_matrix.md: Umfassende Review mit 4 Abschnitten (Konsistenz, Alignment, Methodik, Vollständigkeit)
+- docs/data/country_network.json: 7.2 MB, 5,751 Kanten (78 Self-Loops entfernt)
+- scripts/validate_json.py: 10-Punkt-Validierung
+- scripts/comprehensive_review.py: Review-Matrix-Generator
+
+**Learnings:**
+- Self-Loop-Checks sind kritisch bei undirected network-Aggregation
+- Degree Centrality > 1.0 ist immer ein Red-Flag (Normalisierung fehlerhaft)
+- Nationale vs. internationale Kooperationen müssen explizit unterschieden werden
+- Comprehensive Review-Matrix gegen Forschungsfragen deckt konzeptionelle Fehler auf
+- Modularity und num_communities gehören zu Global Metrics (nicht nur Community-Data)
+- Systematische Validierung in 4 Dimensionen (Konsistenz, Alignment, Methodik, Vollständigkeit) liefert Confidence
+
+**Nächste Schritte:**
+- ✓ Alle Daten validiert und korrekt
+- ✓ Frontend-Implementation kann beginnen
+- ⏸ US-04 (Firmenebene) optional für vertiefende Analysen
+- ⏸ US-08/09 (Visualisierungen) gemäß design.md

@@ -182,7 +182,11 @@ def build_json_export(yearly_graphs, yearly_metrics, G_cumulative, cumulative_me
                 cumulative_metrics['centrality'],
                 cumulative_metrics['communities']
             ),
-            'metrics': cumulative_metrics['global']
+            'metrics': {
+                **cumulative_metrics['global'],
+                'modularity': cumulative_metrics['communities']['modularity'],
+                'num_communities': cumulative_metrics['communities']['num_communities']
+            }
         },
 
         'temporal': {}
@@ -196,7 +200,11 @@ def build_json_export(yearly_graphs, yearly_metrics, G_cumulative, cumulative_me
                 yearly_metrics[year]['centrality'],
                 yearly_metrics[year]['communities']
             ),
-            'metrics': yearly_metrics[year]['global']
+            'metrics': {
+                **yearly_metrics[year]['global'],
+                'modularity': yearly_metrics[year]['communities']['modularity'],
+                'num_communities': yearly_metrics[year]['communities']['num_communities']
+            }
         }
 
     return output
@@ -252,6 +260,12 @@ country_edges_yearly = df_agg.groupby(['year_application', 'country_a', 'country
 
 print(f"[OK] Jährliche Aggregation: {len(country_edges_yearly):,} Länderpaare über alle Jahre")
 
+# Entferne Self-Loops (nationale Kooperationen)
+print("Entferne Self-Loops (nationale Kooperationen)...")
+num_self_loops = len(country_edges_yearly[country_edges_yearly['country_a'] == country_edges_yearly['country_b']])
+country_edges_yearly = country_edges_yearly[country_edges_yearly['country_a'] != country_edges_yearly['country_b']]
+print(f"[OK] {num_self_loops} Self-Loops entfernt, {len(country_edges_yearly):,} internationale Kooperationen verbleiben")
+
 # Kumulatives Netzwerk (alle Jahre)
 print("Aggregiere kumulativ...")
 country_edges_cumulative = df_agg.groupby(['country_a', 'country_b']).agg({
@@ -259,12 +273,17 @@ country_edges_cumulative = df_agg.groupby(['country_a', 'country_b']).agg({
     'owner1': 'count'
 }).rename(columns={'weight': 'total_weight', 'owner1': 'num_firm_pairs'}).reset_index()
 
-print(f"[OK] Kumulative Aggregation: {len(country_edges_cumulative):,} Länderpaare gesamt")
+# Entferne Self-Loops
+country_edges_cumulative = country_edges_cumulative[country_edges_cumulative['country_a'] != country_edges_cumulative['country_b']]
+print(f"[OK] Kumulative Aggregation: {len(country_edges_cumulative):,} internationale Länderpaare gesamt")
 
-# Validierung: Weight-Summe
+# Validierung: Weight-Summe (nur internationale Kooperationen)
 aggregated_weight_sum = country_edges_yearly['total_weight'].sum()
-assert original_weight_sum == aggregated_weight_sum, f"Weight mismatch: {original_weight_sum} != {aggregated_weight_sum}"
-print(f"[OK] Weight-Validierung: {original_weight_sum:,} = {aggregated_weight_sum:,}")
+international_weight_original = df[df['country_1'] != df['country_2']]['weight'].sum()
+assert international_weight_original == aggregated_weight_sum, f"Weight mismatch: {international_weight_original} != {aggregated_weight_sum}"
+national_weight = original_weight_sum - international_weight_original
+print(f"[OK] Weight-Validierung (international): {international_weight_original:,} = {aggregated_weight_sum:,}")
+print(f"[INFO] Nationale Kooperationen (ausgeschlossen): {national_weight:,} ({national_weight/original_weight_sum*100:.2f}%)")
 print()
 
 # ================================================================================
@@ -384,8 +403,8 @@ print()
 print("6. VALIDIERUNG")
 print("-" * 80)
 
-# 6.1 Weight-Summe (bereits oben)
-print(f"[OK] Weight-Summe: {original_weight_sum:,} = {aggregated_weight_sum:,}")
+# 6.1 Weight-Summe (nur internationale Kooperationen)
+print(f"[OK] Weight-Summe (international): {international_weight_original:,} = {aggregated_weight_sum:,}")
 
 # 6.2 Länder-Anzahl
 countries_in_data = set(df['country_1']).union(set(df['country_2']))
