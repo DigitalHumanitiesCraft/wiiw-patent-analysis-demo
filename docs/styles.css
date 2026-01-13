@@ -178,6 +178,8 @@ body {
     padding: var(--card-padding);
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    height: 100%;
 }
 
 #sidebar,
@@ -232,9 +234,8 @@ body {
 
 #slopegraph-svg,
 #bridge-svg {
-    flex: 1;
     width: 100%;
-    min-height: 0;
+    display: block;
 }
 
 #temporal-metrics-view-3 {
