@@ -36,7 +36,7 @@ let currentWeightThreshold = 1;
 
 let currentTab = 'network'; // Current active tab
 let temporalCentrality = 'degree_centrality'; // Centrality for temporal tab
-let temporalTopN = 20;      // Top-N for temporal tab
+let temporalTopN = 10;      // Top-N for temporal tab (reduced from 20 for better readability)
 let bridgeTopN = 10;        // Top-N for bridge tab
 
 let simulation = null;     // Force simulation
@@ -466,10 +466,12 @@ function initTemporalMetrics() {
         // Axes
         cell.append('g')
             .attr('transform', `translate(0,${cellHeight})`)
-            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')));
+            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')))
+            .style('font-size', '11px');
 
         cell.append('g')
-            .call(d3.axisLeft(yScale).ticks(4));
+            .call(d3.axisLeft(yScale).ticks(4))
+            .style('font-size', '11px');
 
         // Title
         cell.append('text')
@@ -539,10 +541,57 @@ function prepareRankData(startYear, endYear, metric, topN) {
         };
     });
 
+    // DIAGNOSE: Log rank changes
+    console.log(`[${metric}] Rank Changes:`, rankData.map(d => ({
+        country: d.country,
+        '2010': d.startRank,
+        '2018': d.endRank,
+        delta: d.rankChange,
+        direction: d.direction
+    })));
+
     // Sort by start rank for display
     rankData.sort((a, b) => a.startRank - b.startRank);
 
     return rankData;
+}
+
+// Helper function: Adjust label positions to prevent overlap
+function adjustLabelPositions(rankData, yScale, minSpacing = 18) {
+    const adjustedData = rankData.map(d => ({
+        ...d,
+        adjustedStartY: yScale(d.startRank),
+        adjustedEndY: yScale(d.endRank)
+    }));
+
+    // Adjust start labels (left side)
+    adjustedData.sort((a, b) => a.adjustedStartY - b.adjustedStartY);
+    for (let i = 1; i < adjustedData.length; i++) {
+        const prev = adjustedData[i - 1];
+        const curr = adjustedData[i];
+        const gap = curr.adjustedStartY - prev.adjustedStartY;
+
+        if (gap < minSpacing) {
+            curr.adjustedStartY = prev.adjustedStartY + minSpacing;
+        }
+    }
+
+    // Adjust end labels (right side)
+    adjustedData.sort((a, b) => a.adjustedEndY - b.adjustedEndY);
+    for (let i = 1; i < adjustedData.length; i++) {
+        const prev = adjustedData[i - 1];
+        const curr = adjustedData[i];
+        const gap = curr.adjustedEndY - prev.adjustedEndY;
+
+        if (gap < minSpacing) {
+            curr.adjustedEndY = prev.adjustedEndY + minSpacing;
+        }
+    }
+
+    // Restore original sort order (by start rank)
+    adjustedData.sort((a, b) => a.startRank - b.startRank);
+
+    return adjustedData;
 }
 
 function initSlopegraph() {
@@ -569,16 +618,28 @@ function updateSlopegraph() {
     // Prepare data
     const rankData = prepareRankData(YEARS.START, YEARS.END, temporalCentrality, temporalTopN);
 
+    // Update summary statistics
+    const stats = rankData.reduce((acc, d) => {
+        acc[d.direction]++;
+        return acc;
+    }, {improved: 0, worsened: 0, unchanged: 0});
+
+    d3.select('#slopegraph-stats').html(`
+        <span style="color: ${DIRECTION_COLORS.improved};">↑ ${stats.improved} improved</span>
+        <span style="color: ${DIRECTION_COLORS.worsened};">↓ ${stats.worsened} worsened</span>
+        <span style="color: ${DIRECTION_COLORS.unchanged};">− ${stats.unchanged} unchanged</span>
+    `);
+
     // Clear previous content
     container.selectAll('*').remove();
 
     const g = container.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Y-Scale (rank position, 1 = top) - with more padding
+    // Y-Scale (rank position, 1 = top) - with aggressive padding for label spacing
     const maxRank = Math.max(...rankData.map(d => Math.max(d.startRank, d.endRank)));
     const yScale = d3.scaleLinear()
-        .domain([0.5, maxRank + 0.5])  // Add 0.5 padding on both ends
+        .domain([-2, maxRank + 3])  // Increased padding: -2 to maxRank+3
         .range([0, plotHeight]);
 
     // Line thickness scale (based on absolute rank change)
@@ -588,6 +649,9 @@ function updateSlopegraph() {
 
     // Color scale for direction
     const directionColor = DIRECTION_COLORS;
+
+    // Apply label collision detection
+    const adjustedData = adjustLabelPositions(rankData, yScale);
 
     // Column headers
     g.append('text')
@@ -622,28 +686,28 @@ function updateSlopegraph() {
         .on('mouseout', hideSlopeTooltip)
         .style('cursor', 'pointer');
 
-    // Left labels (2010)
+    // Left labels (2010) - using adjusted positions
     g.selectAll('.label-left')
-        .data(rankData)
+        .data(adjustedData)
         .join('text')
         .attr('class', 'label-left')
         .attr('x', -10)
-        .attr('y', d => yScale(d.startRank))
+        .attr('y', d => d.adjustedStartY)
         .attr('dy', '0.35em')
         .attr('text-anchor', 'end')
-        .attr('font-size', '11px')
+        .attr('font-size', '12px')
         .text(d => `${d.startRank}. ${d.country}`);
 
-    // Right labels (2018)
+    // Right labels (2018) - using adjusted positions
     g.selectAll('.label-right')
-        .data(rankData)
+        .data(adjustedData)
         .join('text')
         .attr('class', 'label-right')
         .attr('x', plotWidth + 10)
-        .attr('y', d => yScale(d.endRank))
+        .attr('y', d => d.adjustedEndY)
         .attr('dy', '0.35em')
         .attr('text-anchor', 'start')
-        .attr('font-size', '11px')
+        .attr('font-size', '12px')
         .text(d => `${d.endRank}. ${d.country}`);
 }
 
@@ -752,10 +816,12 @@ function initTemporalMetrics2() {
         // Axes
         cell.append('g')
             .attr('transform', `translate(0,${cellHeight})`)
-            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')));
+            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')))
+            .style('font-size', '11px');
 
         cell.append('g')
-            .call(d3.axisLeft(yScale).ticks(4));
+            .call(d3.axisLeft(yScale).ticks(4))
+            .style('font-size', '11px');
 
         // Title
         cell.append('text')
@@ -797,16 +863,28 @@ function updateBridge() {
     // Prepare data using betweenness_centrality
     const rankData = prepareRankData(YEARS.START, YEARS.END, 'betweenness_centrality', bridgeTopN);
 
+    // Update summary statistics
+    const stats = rankData.reduce((acc, d) => {
+        acc[d.direction]++;
+        return acc;
+    }, {improved: 0, worsened: 0, unchanged: 0});
+
+    d3.select('#bridge-stats').html(`
+        <span style="color: ${DIRECTION_COLORS.improved};">↑ ${stats.improved} improved</span>
+        <span style="color: ${DIRECTION_COLORS.worsened};">↓ ${stats.worsened} worsened</span>
+        <span style="color: ${DIRECTION_COLORS.unchanged};">− ${stats.unchanged} unchanged</span>
+    `);
+
     // Clear previous content
     container.selectAll('*').remove();
 
     const g = container.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Y-Scale (rank position, 1 = top)
+    // Y-Scale (rank position, 1 = top) - with aggressive padding for label spacing
     const maxRank = Math.max(...rankData.map(d => Math.max(d.startRank, d.endRank)));
     const yScale = d3.scaleLinear()
-        .domain([0.5, maxRank + 0.5])
+        .domain([-2, maxRank + 3])  // Increased padding: -2 to maxRank+3
         .range([0, plotHeight]);
 
     // Line thickness scale
@@ -816,6 +894,9 @@ function updateBridge() {
 
     // Color scale for direction
     const directionColor = DIRECTION_COLORS;
+
+    // Apply label collision detection
+    const adjustedData = adjustLabelPositions(rankData, yScale);
 
     // Column headers
     g.append('text')
@@ -850,28 +931,28 @@ function updateBridge() {
         .on('mouseout', hideBridgeTooltip)
         .style('cursor', 'pointer');
 
-    // Left labels (2010)
+    // Left labels (2010) - using adjusted positions
     g.selectAll('.label-left')
-        .data(rankData)
+        .data(adjustedData)
         .join('text')
         .attr('class', 'label-left')
         .attr('x', -10)
-        .attr('y', d => yScale(d.startRank))
+        .attr('y', d => d.adjustedStartY)
         .attr('dy', '0.35em')
         .attr('text-anchor', 'end')
-        .attr('font-size', '11px')
+        .attr('font-size', '12px')
         .text(d => `${d.startRank}. ${d.country}`);
 
-    // Right labels (2018)
+    // Right labels (2018) - using adjusted positions
     g.selectAll('.label-right')
-        .data(rankData)
+        .data(adjustedData)
         .join('text')
         .attr('class', 'label-right')
         .attr('x', plotWidth + 10)
-        .attr('y', d => yScale(d.endRank))
+        .attr('y', d => d.adjustedEndY)
         .attr('dy', '0.35em')
         .attr('text-anchor', 'start')
-        .attr('font-size', '11px')
+        .attr('font-size', '12px')
         .text(d => `${d.endRank}. ${d.country}`);
 }
 
@@ -979,10 +1060,12 @@ function initTemporalMetrics3() {
         // Axes
         cell.append('g')
             .attr('transform', `translate(0,${cellHeight})`)
-            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')));
+            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')))
+            .style('font-size', '11px');
 
         cell.append('g')
-            .call(d3.axisLeft(yScale).ticks(4));
+            .call(d3.axisLeft(yScale).ticks(4))
+            .style('font-size', '11px');
 
         // Title
         cell.append('text')

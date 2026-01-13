@@ -139,10 +139,11 @@ body {
 }
 
 .color-box {
-    width: 14px;
-    height: 14px;
-    border-radius: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
     display: inline-block;
+    vertical-align: middle;
 }
 
 /* Tab Content */
@@ -196,6 +197,18 @@ body {
 #slopegraph-controls-header h2,
 #bridge-controls-header h2 {
     margin-bottom: 0.5rem;
+}
+
+#slopegraph-stats,
+#bridge-stats {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+#slopegraph-stats span,
+#bridge-stats span {
+    margin-right: 1rem;
 }
 
 #slopegraph-controls,
