@@ -24,6 +24,9 @@
                 <button class="tab-button" data-tab="bridge" role="tab" aria-selected="false" aria-controls="tab-bridge">
                     Bridge-Länder
                 </button>
+                <button class="tab-button" data-tab="methodology" role="tab" aria-selected="false" aria-controls="tab-methodology">
+                    Daten & Methodik
+                </button>
             </nav>
 
             <div id="legend">
@@ -156,6 +159,138 @@
                             <svg id="temporal-metrics-svg-3"></svg>
                         </div>
                     </aside>
+                </div>
+            </div>
+
+            <!-- Tab 4: Daten & Methodik -->
+            <div id="tab-methodology" class="tab-content" role="tabpanel" aria-labelledby="tab-methodology">
+                <div id="methodology-container">
+
+                    <!-- Section 1: Aggregation Overview -->
+                    <section class="methodology-section">
+                        <h2>Data Aggregation Pipeline</h2>
+                        <div class="pipeline-flow">
+                            <div class="pipeline-step">
+                                <h3>1. Raw Data (RDS)</h3>
+                                <p>Input: R Data Files (.rds)</p>
+                                <ul>
+                                    <li>Source: Patent cooperation networks</li>
+                                    <li>Time span: 2010-2018</li>
+                                    <li>Node attributes: Country, Region, Centrality metrics</li>
+                                </ul>
+                            </div>
+                            <div class="pipeline-arrow">→</div>
+                            <div class="pipeline-step">
+                                <h3>2. Python Processing</h3>
+                                <p>Scripts: scripts/*.py</p>
+                                <ul>
+                                    <li>RDS to JSON conversion</li>
+                                    <li>Centrality calculation (4 metrics)</li>
+                                    <li>Temporal snapshot aggregation</li>
+                                </ul>
+                            </div>
+                            <div class="pipeline-arrow">→</div>
+                            <div class="pipeline-step">
+                                <h3>3. Output (temporal.json)</h3>
+                                <p>Format: 7.2 MB JSON</p>
+                                <ul>
+                                    <li>5 yearly snapshots (2010, 2012, 2014, 2016, 2018)</li>
+                                    <li>110 countries per year</li>
+                                    <li>4 network metrics + metadata</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 2: Metrics Definitions -->
+                    <section class="methodology-section">
+                        <h2>Network Metrics</h2>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <h3>Degree Centrality</h3>
+                                <p class="metric-formula">C<sub>D</sub>(v) = deg(v) / (n-1)</p>
+                                <p>Number of direct connections. High degree = many cooperation partners.</p>
+                            </div>
+                            <div class="metric-card">
+                                <h3>Betweenness Centrality</h3>
+                                <p class="metric-formula">C<sub>B</sub>(v) = Σ (σ<sub>st</sub>(v) / σ<sub>st</sub>)</p>
+                                <p>Bridge position in network. High betweenness = connects different clusters.</p>
+                            </div>
+                            <div class="metric-card">
+                                <h3>Closeness Centrality</h3>
+                                <p class="metric-formula">C<sub>C</sub>(v) = (n-1) / Σ d(v,u)</p>
+                                <p>Average distance to all other nodes. High closeness = fast information spread.</p>
+                            </div>
+                            <div class="metric-card">
+                                <h3>Eigenvector Centrality</h3>
+                                <p class="metric-formula">C<sub>E</sub>(v) = (1/λ) Σ A<sub>vu</sub> C<sub>E</sub>(u)</p>
+                                <p>Connections to important nodes. High eigenvector = connected to central players.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 3: Data Quality Warnings -->
+                    <section class="methodology-section">
+                        <h2>Data Quality & Limitations</h2>
+                        <div class="warning-box">
+                            <h3>⚠️ Synthetic Data Notice</h3>
+                            <p>This visualization uses <strong>synthetic/placeholder data</strong> generated for development purposes. Results do not reflect real-world patent cooperation patterns.</p>
+                        </div>
+                        <div class="quality-issues">
+                            <div class="issue-card warning">
+                                <h4>🔴 Network Density: 95.9%</h4>
+                                <p>Almost all nodes are connected (unrealistic). Real patent networks typically have 5-20% density.</p>
+                                <p><strong>Impact:</strong> Betweenness Centrality values very low and similar across countries.</p>
+                            </div>
+                            <div class="issue-card warning">
+                                <h4>🔴 Modularity: 0.010</h4>
+                                <p>Community detection failed (statistically insignificant). No meaningful clusters found.</p>
+                                <p><strong>Impact:</strong> Region-based coloring used instead of community colors.</p>
+                            </div>
+                            <div class="issue-card info">
+                                <h4>ℹ️ Temporal Snapshots: 5 years</h4>
+                                <p>Biennial sampling (2010, 2012, 2014, 2016, 2018). Missing data for odd years.</p>
+                                <p><strong>Impact:</strong> Short-term dynamics not visible.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 4: Documentation (MD Embed) -->
+                    <section class="methodology-section">
+                        <h2>Project Documentation</h2>
+                        <p>Detailed documentation from the <code>knowledge/</code> folder (Promptotyping Documents):</p>
+
+                        <div class="doc-accordion">
+                            <button class="doc-toggle" data-doc="data">
+                                <span class="toggle-icon">▶</span>
+                                <span class="doc-title">📄 data.md - Data Structure & Variables</span>
+                            </button>
+                            <div class="doc-content" id="doc-data" style="display: none;">
+                                <p><em>Loading documentation...</em></p>
+                            </div>
+                        </div>
+
+                        <div class="doc-accordion">
+                            <button class="doc-toggle" data-doc="research">
+                                <span class="toggle-icon">▶</span>
+                                <span class="doc-title">📄 research.md - Research Questions & Context</span>
+                            </button>
+                            <div class="doc-content" id="doc-research" style="display: none;">
+                                <p><em>Loading documentation...</em></p>
+                            </div>
+                        </div>
+
+                        <div class="doc-accordion">
+                            <button class="doc-toggle" data-doc="requirements">
+                                <span class="toggle-icon">▶</span>
+                                <span class="doc-title">📄 requirements.md - User Stories & Requirements</span>
+                            </button>
+                            <div class="doc-content" id="doc-requirements" style="display: none;">
+                                <p><em>Loading documentation...</em></p>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
             </div>
         </main>

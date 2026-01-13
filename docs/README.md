@@ -274,6 +274,26 @@ Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsne
 - **Temporal Metrics** (VIS-3A): Small Multiples (wiederverwendet)
 - **Hinweis:** Firmenebene-Daten (US-04) nicht verfügbar, Länderebene als Proxy
 
+**Tab 4: Daten & Methodik**
+- **Data Aggregation Pipeline**: Visueller Workflow (RDS → Python → JSON)
+  - 3-Step Flowchart: Raw Data, Processing, Output
+  - Details zu Input/Output-Formaten
+- **Network Metrics Definitions**: Formeln + Interpretationen
+  - Degree Centrality: Anzahl direkter Connections
+  - Betweenness Centrality: Bridge-Positionen
+  - Closeness Centrality: Durchschnittsdistanz
+  - Eigenvector Centrality: Connections zu wichtigen Nodes
+- **Data Quality Warnings**: Transparente Limitationen
+  - ⚠️ Synthetic Data Notice (Placeholder-Daten)
+  - 🔴 Network Density 95.9% (unrealistisch hoch)
+  - 🔴 Modularity 0.010 (Community Detection failed)
+  - ℹ️ Temporal Snapshots (2010, 2012, 2014, 2016, 2018)
+- **Documentation Embed**: Collapsible Markdown-Viewer
+  - 📄 data.md (Data Structure & Variables)
+  - 📄 research.md (Research Questions & Context)
+  - 📄 requirements.md (User Stories & Requirements)
+  - Lazy Loading via fetch(), basic Markdown→HTML conversion
+
 **Technologie:**
 - d3.js v7 (Force Simulation, Data Join, Scales, Zoom, Slopegraph)
 - CSS Grid + Flexbox (70/30 Layout), Tab-Navigation (CSS-only)
@@ -289,9 +309,9 @@ Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsne
 - Ersetzt Community-basierte Farben (Modularity 0.010 statistisch bedeutungslos)
 
 **Code-Statistiken:**
-- docs/index.html: 158 Zeilen
-- docs/styles.css: 323 Zeilen
-- docs/app.js: 1033 Zeilen
+- docs/index.html: 294 Zeilen
+- docs/styles.css: 453 Zeilen
+- docs/app.js: 1285 Zeilen
 
 **⚠️ Hinweis:** Die Visualisierung basiert auf synthetischen Daten mit bekannten Artefakten (siehe unten). Strukturelle Eigenschaften (hohe Dichte, niedrige Modularity) sind nicht repräsentativ für reale Patent-Netzwerke.
 

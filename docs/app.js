@@ -43,6 +43,7 @@ let simulation = null;     // Force simulation
 let svg = null;            // SVG selections
 let slopegraphInitialized = false; // Track if slopegraph has been initialized
 let bridgeInitialized = false;     // Track if bridge view has been initialized
+let methodologyInitialized = false; // Track if methodology view has been initialized
 
 // Color scale for communities (will be set after data load)
 let colorScale = null;
@@ -1092,6 +1093,12 @@ function switchTab(tabName) {
         initBridge();
         bridgeInitialized = true;
     }
+
+    // Lazy initialization for methodology view
+    if (tabName === 'methodology' && !methodologyInitialized) {
+        initMethodology();
+        methodologyInitialized = true;
+    }
 }
 
 function initControls() {
@@ -1170,6 +1177,109 @@ function initControls() {
 
 // ============================================================================
 // INIT
+// ============================================================================
+// METHODOLOGY TAB (Tab 4)
+// ============================================================================
+
+function initMethodology() {
+    console.log('Initializing methodology tab...');
+
+    // Setup accordion toggles
+    const toggles = document.querySelectorAll('.doc-toggle');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const docName = this.getAttribute('data-doc');
+            const content = document.getElementById(`doc-${docName}`);
+            const isVisible = content.style.display === 'block';
+
+            // Toggle visibility
+            content.style.display = isVisible ? 'none' : 'block';
+
+            // Toggle active class for icon rotation
+            this.classList.toggle('active');
+
+            // Load markdown if not already loaded
+            if (!isVisible && content.innerHTML.includes('Loading documentation')) {
+                loadMarkdown(docName);
+            }
+        });
+    });
+}
+
+async function loadMarkdown(docName) {
+    const content = document.getElementById(`doc-${docName}`);
+
+    // Map doc names to file paths
+    const fileMap = {
+        'data': '../knowledge/data.md',
+        'research': '../knowledge/research.md',
+        'requirements': '../knowledge/requirements.md'
+    };
+
+    const filePath = fileMap[docName];
+
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const markdown = await response.text();
+
+        // Simple markdown to HTML conversion (basic)
+        const html = markdownToHTML(markdown);
+        content.innerHTML = html;
+    } catch (error) {
+        console.error(`Failed to load ${docName}.md:`, error);
+        content.innerHTML = `<p style="color: #dc3545;"><strong>Error loading documentation:</strong> ${error.message}</p>
+            <p>File path: <code>${filePath}</code></p>
+            <p>This is expected in local development. Markdown files are served from the knowledge/ folder.</p>`;
+    }
+}
+
+function markdownToHTML(markdown) {
+    // Basic markdown conversion (simple implementation)
+    let html = markdown;
+
+    // Headers
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+
+    // Italic
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+
+    // Code blocks
+    html = html.replace(/```([^`]+)```/gim, '<pre><code>$1</code></pre>');
+
+    // Inline code
+    html = html.replace(/`([^`]+)`/gim, '<code>$1</code>');
+
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank">$1</a>');
+
+    // Unordered lists
+    html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+    // Line breaks
+    html = html.replace(/\n\n/g, '</p><p>');
+    html = '<p>' + html + '</p>';
+
+    // Clean up
+    html = html.replace(/<p><\/p>/g, '');
+    html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+    html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<ul>)/g, '$1');
+    html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<pre>)/g, '$1');
+    html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+
+    return html;
+}
+
 // ============================================================================
 
 loadData();

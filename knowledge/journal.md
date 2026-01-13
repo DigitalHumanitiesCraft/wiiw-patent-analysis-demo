@@ -1446,3 +1446,298 @@ console.log(`[${metric}] Rank Changes:`, rankData.map(d => ({
 - ⏸ Alternative Viz für Bridge Tab (falls Ranks zu ähnlich)
 - ⏸ Responsive Testing (Tablet/Mobile)
 - ⏸ Accessibility Audit (Keyboard Navigation, Screen Reader)
+
+---
+
+## Session 9: Methodology Tab & Documentation Integration (2026-01-13)
+
+### Kontext: Transparenz & Promptotyping Best Practice
+
+**Motivation:** Wissenschaftliche Visualisierungen brauchen methodische Transparenz. User müssen verstehen:
+1. Wie wurden Daten aggregiert? (Pipeline)
+2. Was bedeuten die Metriken? (Definitionen)
+3. Was sind die Limitationen? (Data Quality)
+4. Wo ist die Dokumentation? (MD Embed)
+
+**Promptotyping-Prinzip:** "Documents are source of truth" → Integration in UI schließt Destillation→Implementation Loop
+
+### Implementierung: Tab 4 "Daten & Methodik"
+
+#### Feature 1: Data Aggregation Pipeline
+
+**HTML (index.html:170-203):**
+```html
+<section class="methodology-section">
+    <h2>Data Aggregation Pipeline</h2>
+    <div class="pipeline-flow">
+        <div class="pipeline-step">
+            <h3>1. Raw Data (RDS)</h3>
+            <!-- RDS Input Details -->
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+            <h3>2. Python Processing</h3>
+            <!-- Script Processing -->
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">
+            <h3>3. Output (temporal.json)</h3>
+            <!-- JSON Output -->
+        </div>
+    </div>
+</section>
+```
+
+**CSS (styles.css:265-297):**
+- Flexbox-basiertes Pipeline-Layout
+- `.pipeline-step`: Cards mit Borders
+- `.pipeline-arrow`: Visuelle Verbindung (→)
+
+**Zweck:** Reproduzierbarkeit - Nutzer sehen vollständigen Workflow
+
+---
+
+#### Feature 2: Network Metrics Definitions
+
+**HTML (index.html:206-230):**
+```html
+<section class="methodology-section">
+    <h2>Network Metrics</h2>
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Degree Centrality</h3>
+            <p class="metric-formula">C<sub>D</sub>(v) = deg(v) / (n-1)</p>
+            <p>Number of direct connections...</p>
+        </div>
+        <!-- Betweenness, Closeness, Eigenvector -->
+    </div>
+</section>
+```
+
+**Metrics:**
+| Metric | Formel | Interpretation |
+|--------|--------|----------------|
+| Degree | C_D(v) = deg(v)/(n-1) | Anzahl direkte Connections |
+| Betweenness | C_B(v) = Σ(σ_st(v)/σ_st) | Bridge-Position |
+| Closeness | C_C(v) = (n-1)/Σd(v,u) | Durchschnittsdistanz |
+| Eigenvector | C_E(v) = (1/λ)ΣA_vu·C_E(u) | Connections zu wichtigen Nodes |
+
+**CSS (styles.css:299-326):**
+- Grid Layout (auto-fit, min 250px)
+- `.metric-formula`: Monospace Font, Code-Style
+- Linke Border-Akzent (4px blue)
+
+**Zweck:** Didaktik - Nicht jeder kennt Centrality-Metriken
+
+---
+
+#### Feature 3: Data Quality Warnings
+
+**HTML (index.html:233-256):**
+```html
+<section class="methodology-section">
+    <h2>Data Quality & Limitations</h2>
+    <div class="warning-box">
+        <h3>⚠️ Synthetic Data Notice</h3>
+        <p>This visualization uses <strong>synthetic/placeholder data</strong>...</p>
+    </div>
+    <div class="quality-issues">
+        <div class="issue-card warning">
+            <h4>🔴 Network Density: 95.9%</h4>
+            <p>Almost all nodes connected (unrealistic)...</p>
+            <p><strong>Impact:</strong> Betweenness values very low</p>
+        </div>
+        <!-- Modularity 0.010, Temporal Snapshots -->
+    </div>
+</section>
+```
+
+**Issue Types:**
+- **🔴 warning**: Critical (Density, Modularity) - Red border
+- **ℹ️ info**: Informational (Snapshots) - Blue border
+
+**CSS (styles.css:328-380):**
+- `.warning-box`: Gelber Hintergrund (#fff3cd), prominent
+- `.issue-card.warning`: Rot-akzentuiert (#f8d7da)
+- `.issue-card.info`: Blau-akzentuiert (#d1ecf1)
+
+**Zweck:** Fehlinterpretationen verhindern ("Warum ist Modularity so niedrig?")
+
+---
+
+#### Feature 4: Documentation Embed (MD Files)
+
+**HTML (index.html:259-292):**
+```html
+<section class="methodology-section">
+    <h2>Project Documentation</h2>
+    <div class="doc-accordion">
+        <button class="doc-toggle" data-doc="data">
+            <span class="toggle-icon">▶</span>
+            <span class="doc-title">📄 data.md - Data Structure & Variables</span>
+        </button>
+        <div class="doc-content" id="doc-data" style="display: none;">
+            <p><em>Loading documentation...</em></p>
+        </div>
+    </div>
+    <!-- research.md, requirements.md -->
+</section>
+```
+
+**JavaScript (app.js:1184-1281):**
+```javascript
+function initMethodology() {
+    // Setup accordion toggles
+    document.querySelectorAll('.doc-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const docName = this.getAttribute('data-doc');
+            const content = document.getElementById(`doc-${docName}`);
+
+            // Toggle visibility
+            content.style.display = isVisible ? 'none' : 'block';
+            this.classList.toggle('active'); // Icon rotation
+
+            // Lazy load markdown
+            if (!isVisible && content.innerHTML.includes('Loading')) {
+                loadMarkdown(docName);
+            }
+        });
+    });
+}
+
+async function loadMarkdown(docName) {
+    const filePath = {
+        'data': '../knowledge/data.md',
+        'research': '../knowledge/research.md',
+        'requirements': '../knowledge/requirements.md'
+    }[docName];
+
+    const response = await fetch(filePath);
+    const markdown = await response.text();
+    content.innerHTML = markdownToHTML(markdown);
+}
+
+function markdownToHTML(markdown) {
+    // Basic conversion: Headers, Bold, Italic, Code, Links, Lists
+    // Regex-basierte Transformation
+}
+```
+
+**CSS (styles.css:382-450):**
+- `.doc-accordion`: Border + Border-Radius
+- `.doc-toggle`: Hover-Effect (#e9ecef)
+- `.toggle-icon`: Rotate 90° on `.active`
+- `.doc-content`: Max-height 500px, overflow-y scroll
+
+**Zweck:** Kontextualisierte Dokumentation direkt in der UI
+
+---
+
+### Code-Statistiken
+
+| Datei | Vorher | Nachher | Δ |
+|-------|--------|---------|---|
+| docs/index.html | 160 | 294 | +134 |
+| docs/styles.css | 334 | 453 | +119 |
+| docs/app.js | 1093 | 1285 | +192 |
+| **TOTAL** | **1587** | **2032** | **+445** |
+
+**Neue Funktionen:**
+- `initMethodology()` (23 Zeilen)
+- `loadMarkdown()` (28 Zeilen)
+- `markdownToHTML()` (42 Zeilen)
+
+---
+
+### Learnings
+
+#### Best Practices für Documentation Embed
+
+**Gelernt:**
+- Lazy Loading verhindert 3× fetch auf init (nur bei Klick)
+- `fetch('../knowledge/data.md')` funktioniert nur mit lokalem Server
+  - Alternative: Hardcode MD in HTML (nicht scalable)
+  - Besser: Build-Step (MD → HTML pre-compile)
+- Basic Markdown Parser ausreichend für einfache Docs
+  - Keine Dependency auf marked.js/showdown.js nötig
+  - Regex-basiert deckt 90% der Fälle ab
+
+**Limitation:**
+- Nested Lists nicht unterstützt (Regex zu komplex)
+- Tables nicht konvertiert (würde 50+ Zeilen Code brauchen)
+- Syntax Highlighting fehlt (Code-Blocks nur `<pre><code>`)
+
+**Production-Ready Alternative:**
+- Verwende marked.js CDN:
+  ```html
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  ```
+  ```javascript
+  content.innerHTML = marked.parse(markdown);
+  ```
+
+#### UI/UX für Methodology Tabs
+
+**Erkenntnisse:**
+- Pipeline-Visualisierung > reine Textbeschreibung
+  - Flowchart mit Pfeilen zeigt Datenfluss intuitiv
+  - 3 Steps optimal (mehr = zu komplex)
+- Color-Coding für Warnings kritisch:
+  - 🔴 Red = Action required (Daten-Problem)
+  - ℹ️ Blue = Information only (Kontext)
+  - Gelber Warning-Box = sofort sichtbar
+- Accordion für lange Docs:
+  - Collapsed by default = reduziert Scroll-Overload
+  - Icon-Rotation (▶ → ▼) zeigt State visuell
+
+---
+
+### Forschungsfragen Re-Evaluation
+
+**RQ1-3:** Keine direkten Änderungen
+
+**Neue Meta-Frage:**
+**RQ-Meta: Ist die Visualisierung verständlich ohne Vorwissen?**
+- **Vorher:** Nein - Centrality-Metriken unerklärt
+- **Nachher:** ✅ Ja - Tab 4 bietet vollständigen Kontext
+  - Metriken-Definitionen verfügbar
+  - Data Quality transparent
+  - Promptotyping Docs zugänglich
+
+**Impact:** Tab 4 macht Tool selbsterklärend → ideal für Präsentationen/Teaching
+
+---
+
+### Outputs
+
+**Modified Files:**
+- docs/index.html (160 → 294 Zeilen, +134)
+- docs/styles.css (334 → 453 Zeilen, +119)
+- docs/app.js (1093 → 1285 Zeilen, +192)
+
+**New Tab:**
+- Tab 4: "Daten & Methodik" (4 Sections, collapsible MD docs)
+
+**Affected Components:**
+- Tab Navigation (+1 Button)
+- Lazy Init System (+methodologyInitialized flag)
+- Markdown Parser (new utility function)
+
+---
+
+### Next Steps
+
+**Kurzfristig:**
+- ✅ Tab 4 implementiert
+- ⏳ Browser-Testing (Accordion, MD loading)
+- ⏳ Git Commit + Push
+- ⏳ README.md Update (Tab 4 dokumentieren)
+
+**Mittel:**
+- Optional: marked.js Integration für full Markdown support
+- Optional: Syntax Highlighting (highlight.js)
+- Optional: Build-Step für MD → HTML pre-compilation
+
+**Langfristig:**
+- ⏸ Responsive Testing (Methodology-Container auf Mobile)
+- ⏸ Accessibility Audit (Accordion ARIA attributes)
