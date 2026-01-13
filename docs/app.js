@@ -556,44 +556,6 @@ function prepareRankData(startYear, endYear, metric, topN) {
     return rankData;
 }
 
-// Helper function: Adjust label positions to prevent overlap
-function adjustLabelPositions(rankData, yScale, minSpacing = 18) {
-    const adjustedData = rankData.map(d => ({
-        ...d,
-        adjustedStartY: yScale(d.startRank),
-        adjustedEndY: yScale(d.endRank)
-    }));
-
-    // Adjust start labels (left side)
-    adjustedData.sort((a, b) => a.adjustedStartY - b.adjustedStartY);
-    for (let i = 1; i < adjustedData.length; i++) {
-        const prev = adjustedData[i - 1];
-        const curr = adjustedData[i];
-        const gap = curr.adjustedStartY - prev.adjustedStartY;
-
-        if (gap < minSpacing) {
-            curr.adjustedStartY = prev.adjustedStartY + minSpacing;
-        }
-    }
-
-    // Adjust end labels (right side)
-    adjustedData.sort((a, b) => a.adjustedEndY - b.adjustedEndY);
-    for (let i = 1; i < adjustedData.length; i++) {
-        const prev = adjustedData[i - 1];
-        const curr = adjustedData[i];
-        const gap = curr.adjustedEndY - prev.adjustedEndY;
-
-        if (gap < minSpacing) {
-            curr.adjustedEndY = prev.adjustedEndY + minSpacing;
-        }
-    }
-
-    // Restore original sort order (by start rank)
-    adjustedData.sort((a, b) => a.startRank - b.startRank);
-
-    return adjustedData;
-}
-
 function initSlopegraph() {
     const container = d3.select('#slopegraph-svg');
     const width = container.node().clientWidth;
@@ -609,14 +571,21 @@ function initSlopegraph() {
 function updateSlopegraph() {
     const container = d3.select('#slopegraph-svg');
     const width = container.node().clientWidth;
-    const height = container.node().clientHeight;
+
+    // Prepare data FIRST to calculate required height
+    const rankData = prepareRankData(YEARS.START, YEARS.END, temporalCentrality, temporalTopN);
 
     const margin = {top: 60, right: 150, bottom: 40, left: 150};
     const plotWidth = width - margin.left - margin.right;
-    const plotHeight = height - margin.top - margin.bottom;
 
-    // Prepare data
-    const rankData = prepareRankData(YEARS.START, YEARS.END, temporalCentrality, temporalTopN);
+    // Calculate required height: 25px per label minimum
+    const minLabelSpacing = 25;
+    const requiredPlotHeight = Math.max(400, rankData.length * minLabelSpacing);
+    const plotHeight = requiredPlotHeight;
+    const height = plotHeight + margin.top + margin.bottom;
+
+    // Set SVG height dynamically
+    container.attr('height', height);
 
     // Update summary statistics
     const stats = rankData.reduce((acc, d) => {
@@ -649,9 +618,6 @@ function updateSlopegraph() {
 
     // Color scale for direction
     const directionColor = DIRECTION_COLORS;
-
-    // Apply label collision detection
-    const adjustedData = adjustLabelPositions(rankData, yScale);
 
     // Column headers
     g.append('text')
@@ -686,25 +652,25 @@ function updateSlopegraph() {
         .on('mouseout', hideSlopeTooltip)
         .style('cursor', 'pointer');
 
-    // Left labels (2010) - using adjusted positions
+    // Left labels (2010)
     g.selectAll('.label-left')
-        .data(adjustedData)
+        .data(rankData)
         .join('text')
         .attr('class', 'label-left')
         .attr('x', -10)
-        .attr('y', d => d.adjustedStartY)
+        .attr('y', d => yScale(d.startRank))
         .attr('dy', '0.35em')
         .attr('text-anchor', 'end')
         .attr('font-size', '12px')
         .text(d => `${d.startRank}. ${d.country}`);
 
-    // Right labels (2018) - using adjusted positions
+    // Right labels (2018)
     g.selectAll('.label-right')
-        .data(adjustedData)
+        .data(rankData)
         .join('text')
         .attr('class', 'label-right')
         .attr('x', plotWidth + 10)
-        .attr('y', d => d.adjustedEndY)
+        .attr('y', d => yScale(d.endRank))
         .attr('dy', '0.35em')
         .attr('text-anchor', 'start')
         .attr('font-size', '12px')
@@ -854,14 +820,21 @@ function initBridge() {
 function updateBridge() {
     const container = d3.select('#bridge-svg');
     const width = container.node().clientWidth;
-    const height = container.node().clientHeight;
+
+    // Prepare data FIRST to calculate required height
+    const rankData = prepareRankData(YEARS.START, YEARS.END, 'betweenness_centrality', bridgeTopN);
 
     const margin = {top: 60, right: 150, bottom: 40, left: 150};
     const plotWidth = width - margin.left - margin.right;
-    const plotHeight = height - margin.top - margin.bottom;
 
-    // Prepare data using betweenness_centrality
-    const rankData = prepareRankData(YEARS.START, YEARS.END, 'betweenness_centrality', bridgeTopN);
+    // Calculate required height: 25px per label minimum
+    const minLabelSpacing = 25;
+    const requiredPlotHeight = Math.max(400, rankData.length * minLabelSpacing);
+    const plotHeight = requiredPlotHeight;
+    const height = plotHeight + margin.top + margin.bottom;
+
+    // Set SVG height dynamically
+    container.attr('height', height);
 
     // Update summary statistics
     const stats = rankData.reduce((acc, d) => {
@@ -894,9 +867,6 @@ function updateBridge() {
 
     // Color scale for direction
     const directionColor = DIRECTION_COLORS;
-
-    // Apply label collision detection
-    const adjustedData = adjustLabelPositions(rankData, yScale);
 
     // Column headers
     g.append('text')
@@ -931,25 +901,25 @@ function updateBridge() {
         .on('mouseout', hideBridgeTooltip)
         .style('cursor', 'pointer');
 
-    // Left labels (2010) - using adjusted positions
+    // Left labels (2010)
     g.selectAll('.label-left')
-        .data(adjustedData)
+        .data(rankData)
         .join('text')
         .attr('class', 'label-left')
         .attr('x', -10)
-        .attr('y', d => d.adjustedStartY)
+        .attr('y', d => yScale(d.startRank))
         .attr('dy', '0.35em')
         .attr('text-anchor', 'end')
         .attr('font-size', '12px')
         .text(d => `${d.startRank}. ${d.country}`);
 
-    // Right labels (2018) - using adjusted positions
+    // Right labels (2018)
     g.selectAll('.label-right')
-        .data(adjustedData)
+        .data(rankData)
         .join('text')
         .attr('class', 'label-right')
         .attr('x', plotWidth + 10)
-        .attr('y', d => d.adjustedEndY)
+        .attr('y', d => yScale(d.endRank))
         .attr('dy', '0.35em')
         .attr('text-anchor', 'start')
         .attr('font-size', '12px')
