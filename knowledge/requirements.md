@@ -157,6 +157,22 @@ Status: Abgeschlossen (3-Tab-Navigation: Netzwerk | Temporal | Bridge-Länder. T
 
 ---
 
+**US-10: Methodentransparenz & Dokumentation**
+Als Forschender möchte ich die Datenverarbeitungspipeline und Berechnungsmethoden einsehen können, um die Reproduzierbarkeit und Validität der Analysen nachvollziehen zu können.
+
+Akzeptanzkriterien:
+- Visueller Workflow der Datenverarbeitung (RDS → Python → JSON)
+- Definitionen aller Netzwerk-Metriken mit Formeln
+- Transparente Darstellung von Datenqualitätsproblemen (Synthetic Data Warnings)
+- Zugriff auf vollständige Projektdokumentation (data.md, research.md, requirements.md)
+- Collapsible Accordion für Markdown-Dokumente (Lazy Loading)
+
+Technologie: Vanilla JavaScript (fetch API), Basic Markdown→HTML Parser (Regex-basiert, keine Dependencies)
+
+Status: Abgeschlossen (Tab 4 "Daten & Methodik" mit 4 Sections: Data Pipeline Flowchart, Network Metrics Definitions [4 Centrality-Formeln], Data Quality Warnings [Density 95.9%, Modularity 0.010, Synthetic Data Notice], Documentation Embed [Accordion UI mit knowledge/*.md files]. Basic Markdown Parser unterstützt Headers, Bold, Italic, Code Blocks, Links, Listen.)
+
+---
+
 ## Priorisierung
 
 | Priorität | Stories | Begründung |

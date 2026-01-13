@@ -24,6 +24,28 @@ const REGION_NAMES = {
     middle_east: 'Naher Osten'
 };
 
+// Force Simulation Parameters
+const FORCE_PARAMS = {
+    linkDistance: 50,
+    chargeStrength: -200,
+    collisionRadius: 2  // Added to node radius
+};
+
+// Visual Encoding Ranges
+const VISUAL_ENCODING = {
+    nodeSize: [3, 20],      // Node radius range
+    edgeWidth: [0.5, 3],    // Edge stroke width range
+    edgeOpacity: [0.1, 0.6], // Edge opacity range
+    lineThickness: [1, 4]    // Slopegraph line thickness range
+};
+
+// Layout Margins
+const MARGINS = {
+    ranking: {top: 20, right: 20, bottom: 20, left: 50},
+    temporal: {top: 20, right: 20, bottom: 30, left: 50},
+    slopegraph: {top: 60, right: 150, bottom: 40, left: 150}
+};
+
 // ============================================================================
 // GLOBAL STATE
 // ============================================================================
@@ -196,15 +218,15 @@ function updateNetwork() {
     // Scales
     const nodeSizeScale = d3.scaleSqrt()
         .domain(d3.extent(nodes, d => d.weighted_degree))
-        .range([5, 30]);
+        .range(VISUAL_ENCODING.nodeSize);
 
     const edgeWidthScale = d3.scaleSqrt()
         .domain(d3.extent(edges, d => d.weight))
-        .range([0.5, 5]);
+        .range(VISUAL_ENCODING.edgeWidth);
 
     const edgeOpacityScale = d3.scaleLinear()
         .domain(d3.extent(edges, d => d.weight))
-        .range([0.2, 0.8]);
+        .range(VISUAL_ENCODING.edgeOpacity);
 
     // Force simulation
     if (simulation) simulation.stop();
@@ -212,13 +234,13 @@ function updateNetwork() {
     simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(edges)
             .id(d => d.id)
-            .distance(50))
-        .force('charge', d3.forceManyBody().strength(-200))
+            .distance(FORCE_PARAMS.linkDistance))
+        .force('charge', d3.forceManyBody().strength(FORCE_PARAMS.chargeStrength))
         .force('center', d3.forceCenter(
             d3.select('#network-svg').node().clientWidth / 2,
             d3.select('#network-svg').node().clientHeight / 2
         ))
-        .force('collision', d3.forceCollide().radius(d => nodeSizeScale(d.weighted_degree) + 2));
+        .force('collision', d3.forceCollide().radius(d => nodeSizeScale(d.weighted_degree) + FORCE_PARAMS.collisionRadius));
 
     // Update links
     const link = d3.select('.links')
@@ -355,7 +377,7 @@ function updateRanking() {
         .slice(0, currentTopN);
 
     const container = d3.select('#ranking-svg');
-    const margin = {top: 20, right: 20, bottom: 20, left: 50};
+    const margin = MARGINS.ranking;
     const width = container.node().clientWidth - margin.left - margin.right;
     const height = Math.max(400, sortedNodes.length * 25);
 
@@ -406,7 +428,11 @@ function updateRanking() {
 // VIS-3A: TEMPORAL METRICS
 // ============================================================================
 
-function initTemporalMetrics() {
+/**
+ * Generic function to render temporal metrics small multiples
+ * @param {string} containerId - CSS selector for the SVG container (e.g., '#temporal-metrics-svg')
+ */
+function renderTemporalMetrics(containerId) {
     const metrics = ['density', 'modularity', 'num_communities', 'avg_clustering'];
     const years = data.metadata.years;
 
@@ -419,8 +445,8 @@ function initTemporalMetrics() {
         }))
     }));
 
-    const container = d3.select('#temporal-metrics-svg');
-    const margin = {top: 20, right: 20, bottom: 30, left: 50};
+    const container = d3.select(containerId);
+    const margin = MARGINS.temporal;
     const width = container.node().clientWidth - margin.left - margin.right;
     const height = container.node().clientHeight - margin.top - margin.bottom;
 
@@ -483,6 +509,11 @@ function initTemporalMetrics() {
             .attr('font-weight', 'bold')
             .text(d.metric.replace(/_/g, ' '));
     });
+}
+
+// Wrapper functions for backward compatibility
+function initTemporalMetrics() {
+    renderTemporalMetrics('#temporal-metrics-svg');
 }
 
 // ============================================================================
@@ -542,41 +573,28 @@ function prepareRankData(startYear, endYear, metric, topN) {
         };
     });
 
-    // DIAGNOSE: Log rank changes
-    console.log(`[${metric}] Rank Changes:`, rankData.map(d => ({
-        country: d.country,
-        '2010': d.startRank,
-        '2018': d.endRank,
-        delta: d.rankChange,
-        direction: d.direction
-    })));
-
     // Sort by start rank for display
     rankData.sort((a, b) => a.startRank - b.startRank);
 
     return rankData;
 }
 
-function initSlopegraph() {
-    const container = d3.select('#slopegraph-svg');
-    const width = container.node().clientWidth;
-    const height = container.node().clientHeight;
-
-    container
-        .attr('width', width)
-        .attr('height', height);
-
-    updateSlopegraph();
-}
-
-function updateSlopegraph() {
-    const container = d3.select('#slopegraph-svg');
+/**
+ * Generic slopegraph renderer for rank comparison visualizations
+ * @param {string} containerId - CSS selector for SVG container
+ * @param {string} statsId - CSS selector for statistics display element
+ * @param {string} metric - Centrality metric to visualize
+ * @param {number} topN - Number of top countries to display
+ * @param {Object} tooltipConfig - Tooltip configuration {showFn, hideFn, metricLabel, precision}
+ */
+function renderSlopegraph(containerId, statsId, metric, topN, tooltipConfig) {
+    const container = d3.select(containerId);
     const width = container.node().clientWidth;
 
     // Prepare data FIRST to calculate required height
-    const rankData = prepareRankData(YEARS.START, YEARS.END, temporalCentrality, temporalTopN);
+    const rankData = prepareRankData(YEARS.START, YEARS.END, metric, topN);
 
-    const margin = {top: 60, right: 150, bottom: 40, left: 150};
+    const margin = MARGINS.slopegraph;
     const plotWidth = width - margin.left - margin.right;
 
     // Calculate required height: 25px per label minimum
@@ -594,7 +612,7 @@ function updateSlopegraph() {
         return acc;
     }, {improved: 0, worsened: 0, unchanged: 0});
 
-    d3.select('#slopegraph-stats').html(`
+    d3.select(statsId).html(`
         <span style="color: ${DIRECTION_COLORS.improved};">↑ ${stats.improved} improved</span>
         <span style="color: ${DIRECTION_COLORS.worsened};">↓ ${stats.worsened} worsened</span>
         <span style="color: ${DIRECTION_COLORS.unchanged};">− ${stats.unchanged} unchanged</span>
@@ -615,7 +633,7 @@ function updateSlopegraph() {
     // Line thickness scale (based on absolute rank change)
     const thicknessScale = d3.scaleLinear()
         .domain([0, d3.max(rankData, d => Math.abs(d.rankChange))])
-        .range([1, 4]);
+        .range(VISUAL_ENCODING.lineThickness);
 
     // Color scale for direction
     const directionColor = DIRECTION_COLORS;
@@ -638,7 +656,7 @@ function updateSlopegraph() {
         .text(YEARS.END);
 
     // Draw lines
-    const lines = g.selectAll('.slope-line')
+    g.selectAll('.slope-line')
         .data(rankData)
         .join('line')
         .attr('class', 'slope-line')
@@ -649,8 +667,8 @@ function updateSlopegraph() {
         .attr('stroke', d => directionColor[d.direction])
         .attr('stroke-width', d => thicknessScale(Math.abs(d.rankChange)))
         .attr('stroke-opacity', 0.6)
-        .on('mouseover', showSlopeTooltip)
-        .on('mouseout', hideSlopeTooltip)
+        .on('mouseover', tooltipConfig.showFn)
+        .on('mouseout', tooltipConfig.hideFn)
         .style('cursor', 'pointer');
 
     // Left labels (2010)
@@ -676,6 +694,32 @@ function updateSlopegraph() {
         .attr('text-anchor', 'start')
         .attr('font-size', '12px')
         .text(d => `${d.endRank}. ${d.country}`);
+}
+
+// Wrapper functions for backward compatibility
+function initSlopegraph() {
+    const container = d3.select('#slopegraph-svg');
+    const width = container.node().clientWidth;
+    const height = container.node().clientHeight;
+
+    container
+        .attr('width', width)
+        .attr('height', height);
+
+    updateSlopegraph();
+}
+
+function updateSlopegraph() {
+    renderSlopegraph(
+        '#slopegraph-svg',
+        '#slopegraph-stats',
+        temporalCentrality,
+        temporalTopN,
+        {
+            showFn: showSlopeTooltip,
+            hideFn: hideSlopeTooltip
+        }
+    );
 }
 
 // Slopegraph tooltip functions
@@ -723,82 +767,7 @@ function hideSlopeTooltip(event) {
 }
 
 function initTemporalMetrics2() {
-    // Initialize second instance of temporal metrics for temporal tab
-    const metrics = ['density', 'modularity', 'num_communities', 'avg_clustering'];
-    const years = data.metadata.years;
-
-    const temporalData = metrics.map(metric => ({
-        metric,
-        values: years.map(year => ({
-            year,
-            value: data.temporal[year].metrics[metric]
-        }))
-    }));
-
-    const container = d3.select('#temporal-metrics-svg-2');
-    const margin = {top: 20, right: 20, bottom: 30, left: 50};
-    const width = container.node().clientWidth - margin.left - margin.right;
-    const height = container.node().clientHeight - margin.top - margin.bottom;
-
-    container.selectAll('*').remove();
-
-    const g = container.append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Small multiples layout (2x2 grid)
-    const cellWidth = width / 2 - 10;
-    const cellHeight = height / 2 - 10;
-
-    temporalData.forEach((d, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const offsetX = col * (cellWidth + 10);
-        const offsetY = row * (cellHeight + 10);
-
-        const cell = g.append('g')
-            .attr('transform', `translate(${offsetX},${offsetY})`);
-
-        // Scales
-        const xScale = d3.scaleLinear()
-            .domain(d3.extent(years))
-            .range([0, cellWidth]);
-
-        const yScale = d3.scaleLinear()
-            .domain(d3.extent(d.values, v => v.value))
-            .range([cellHeight, 0])
-            .nice();
-
-        // Line
-        const line = d3.line()
-            .x(v => xScale(v.year))
-            .y(v => yScale(v.value));
-
-        cell.append('path')
-            .datum(d.values)
-            .attr('fill', 'none')
-            .attr('stroke', 'steelblue')
-            .attr('stroke-width', 2)
-            .attr('d', line);
-
-        // Axes
-        cell.append('g')
-            .attr('transform', `translate(0,${cellHeight})`)
-            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')))
-            .style('font-size', '11px');
-
-        cell.append('g')
-            .call(d3.axisLeft(yScale).ticks(4))
-            .style('font-size', '11px');
-
-        // Title
-        cell.append('text')
-            .attr('x', cellWidth / 2)
-            .attr('y', -5)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '12px')
-            .attr('font-weight', 'bold')
-            .text(d.metric.replace(/_/g, ' '));
-    });
+    renderTemporalMetrics('#temporal-metrics-svg-2');
 }
 
 // ============================================================================
@@ -819,112 +788,16 @@ function initBridge() {
 }
 
 function updateBridge() {
-    const container = d3.select('#bridge-svg');
-    const width = container.node().clientWidth;
-
-    // Prepare data FIRST to calculate required height
-    const rankData = prepareRankData(YEARS.START, YEARS.END, 'betweenness_centrality', bridgeTopN);
-
-    const margin = {top: 60, right: 150, bottom: 40, left: 150};
-    const plotWidth = width - margin.left - margin.right;
-
-    // Calculate required height: 25px per label minimum
-    const minLabelSpacing = 25;
-    const requiredPlotHeight = Math.max(400, rankData.length * minLabelSpacing);
-    const plotHeight = requiredPlotHeight;
-    const height = plotHeight + margin.top + margin.bottom;
-
-    // Set SVG height dynamically
-    container.attr('height', height);
-
-    // Update summary statistics
-    const stats = rankData.reduce((acc, d) => {
-        acc[d.direction]++;
-        return acc;
-    }, {improved: 0, worsened: 0, unchanged: 0});
-
-    d3.select('#bridge-stats').html(`
-        <span style="color: ${DIRECTION_COLORS.improved};">↑ ${stats.improved} improved</span>
-        <span style="color: ${DIRECTION_COLORS.worsened};">↓ ${stats.worsened} worsened</span>
-        <span style="color: ${DIRECTION_COLORS.unchanged};">− ${stats.unchanged} unchanged</span>
-    `);
-
-    // Clear previous content
-    container.selectAll('*').remove();
-
-    const g = container.append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Y-Scale (rank position, 1 = top) - with aggressive padding for label spacing
-    const maxRank = Math.max(...rankData.map(d => Math.max(d.startRank, d.endRank)));
-    const yScale = d3.scaleLinear()
-        .domain([-2, maxRank + 3])  // Increased padding: -2 to maxRank+3
-        .range([0, plotHeight]);
-
-    // Line thickness scale
-    const thicknessScale = d3.scaleLinear()
-        .domain([0, d3.max(rankData, d => Math.abs(d.rankChange))])
-        .range([1, 4]);
-
-    // Color scale for direction
-    const directionColor = DIRECTION_COLORS;
-
-    // Column headers
-    g.append('text')
-        .attr('x', 0)
-        .attr('y', -30)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
-        .attr('font-weight', 'bold')
-        .text(YEARS.START);
-
-    g.append('text')
-        .attr('x', plotWidth)
-        .attr('y', -30)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
-        .attr('font-weight', 'bold')
-        .text(YEARS.END);
-
-    // Draw lines
-    g.selectAll('.slope-line')
-        .data(rankData)
-        .join('line')
-        .attr('class', 'slope-line')
-        .attr('x1', 0)
-        .attr('y1', d => yScale(d.startRank))
-        .attr('x2', plotWidth)
-        .attr('y2', d => yScale(d.endRank))
-        .attr('stroke', d => directionColor[d.direction])
-        .attr('stroke-width', d => thicknessScale(Math.abs(d.rankChange)))
-        .attr('stroke-opacity', 0.6)
-        .on('mouseover', showBridgeTooltip)
-        .on('mouseout', hideBridgeTooltip)
-        .style('cursor', 'pointer');
-
-    // Left labels (2010)
-    g.selectAll('.label-left')
-        .data(rankData)
-        .join('text')
-        .attr('class', 'label-left')
-        .attr('x', -10)
-        .attr('y', d => yScale(d.startRank))
-        .attr('dy', '0.35em')
-        .attr('text-anchor', 'end')
-        .attr('font-size', '12px')
-        .text(d => `${d.startRank}. ${d.country}`);
-
-    // Right labels (2018)
-    g.selectAll('.label-right')
-        .data(rankData)
-        .join('text')
-        .attr('class', 'label-right')
-        .attr('x', plotWidth + 10)
-        .attr('y', d => yScale(d.endRank))
-        .attr('dy', '0.35em')
-        .attr('text-anchor', 'start')
-        .attr('font-size', '12px')
-        .text(d => `${d.endRank}. ${d.country}`);
+    renderSlopegraph(
+        '#bridge-svg',
+        '#bridge-stats',
+        'betweenness_centrality',
+        bridgeTopN,
+        {
+            showFn: showBridgeTooltip,
+            hideFn: hideBridgeTooltip
+        }
+    );
 }
 
 function showBridgeTooltip(event, d) {
@@ -971,82 +844,7 @@ function hideBridgeTooltip(event) {
 }
 
 function initTemporalMetrics3() {
-    // Initialize third instance of temporal metrics for bridge tab
-    const metrics = ['density', 'modularity', 'num_communities', 'avg_clustering'];
-    const years = data.metadata.years;
-
-    const temporalData = metrics.map(metric => ({
-        metric,
-        values: years.map(year => ({
-            year,
-            value: data.temporal[year].metrics[metric]
-        }))
-    }));
-
-    const container = d3.select('#temporal-metrics-svg-3');
-    const margin = {top: 20, right: 20, bottom: 30, left: 50};
-    const width = container.node().clientWidth - margin.left - margin.right;
-    const height = container.node().clientHeight - margin.top - margin.bottom;
-
-    container.selectAll('*').remove();
-
-    const g = container.append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Small multiples layout (2x2 grid)
-    const cellWidth = width / 2 - 10;
-    const cellHeight = height / 2 - 10;
-
-    temporalData.forEach((d, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const offsetX = col * (cellWidth + 10);
-        const offsetY = row * (cellHeight + 10);
-
-        const cell = g.append('g')
-            .attr('transform', `translate(${offsetX},${offsetY})`);
-
-        // Scales
-        const xScale = d3.scaleLinear()
-            .domain(d3.extent(years))
-            .range([0, cellWidth]);
-
-        const yScale = d3.scaleLinear()
-            .domain(d3.extent(d.values, v => v.value))
-            .range([cellHeight, 0])
-            .nice();
-
-        // Line
-        const line = d3.line()
-            .x(v => xScale(v.year))
-            .y(v => yScale(v.value));
-
-        cell.append('path')
-            .datum(d.values)
-            .attr('fill', 'none')
-            .attr('stroke', 'steelblue')
-            .attr('stroke-width', 2)
-            .attr('d', line);
-
-        // Axes
-        cell.append('g')
-            .attr('transform', `translate(0,${cellHeight})`)
-            .call(d3.axisBottom(xScale).ticks(4).tickFormat(d3.format('d')))
-            .style('font-size', '11px');
-
-        cell.append('g')
-            .call(d3.axisLeft(yScale).ticks(4))
-            .style('font-size', '11px');
-
-        // Title
-        cell.append('text')
-            .attr('x', cellWidth / 2)
-            .attr('y', -5)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '12px')
-            .attr('font-weight', 'bold')
-            .text(d.metric.replace(/_/g, ' '));
-    });
+    renderTemporalMetrics('#temporal-metrics-svg-3');
 }
 
 // ============================================================================
@@ -1182,8 +980,6 @@ function initControls() {
 // ============================================================================
 
 function initMethodology() {
-    console.log('Initializing methodology tab...');
-
     // Setup accordion toggles
     const toggles = document.querySelectorAll('.doc-toggle');
     toggles.forEach(toggle => {

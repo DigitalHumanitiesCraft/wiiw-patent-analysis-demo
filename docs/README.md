@@ -308,10 +308,10 @@ Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsne
 - Afrika (Orange), Ozeanien (Türkis), Naher Osten (Braun)
 - Ersetzt Community-basierte Farben (Modularity 0.010 statistisch bedeutungslos)
 
-**Code-Statistiken:**
+**Code-Statistiken (nach Session 10 Refactoring):**
 - docs/index.html: 294 Zeilen
 - docs/styles.css: 453 Zeilen
-- docs/app.js: 1285 Zeilen
+- docs/app.js: 1081 Zeilen (-204 / -15.9% durch Code-Deduplication)
 
 **⚠️ Hinweis:** Die Visualisierung basiert auf synthetischen Daten mit bekannten Artefakten (siehe unten). Strukturelle Eigenschaften (hohe Dichte, niedrige Modularity) sind nicht repräsentativ für reale Patent-Netzwerke.
 
