@@ -287,7 +287,7 @@ Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsne
   - ⚠️ Synthetic Data Notice (Placeholder-Daten)
   - 🔴 Network Density 95.9% (unrealistisch hoch)
   - 🔴 Modularity 0.010 (Community Detection failed)
-  - ℹ️ Temporal Snapshots (2010, 2012, 2014, 2016, 2018)
+  - ℹ️ Temporal Snapshots (2010-2018, 9 years annual)
 - **Documentation Embed**: Collapsible Markdown-Viewer
   - 📄 data.md (Data Structure & Variables)
   - 📄 research.md (Research Questions & Context)
