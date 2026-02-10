@@ -1,333 +1,333 @@
-# Explorationsergebnisse: Patent-Kooperationsnetzwerk
+# Exploration Results: Patent Cooperation Network
 
-Dieser Ordner enthält die Ergebnisse der forschungsfragen-orientierten Exploration der Patentkooperationsdaten (2010-2018).
+This folder contains the results of the research question-oriented exploration of the patent cooperation data (2010-2018).
 
-**Generiert am:** 2026-01-12
-**Skript:** `scripts/explore_research_questions.py`
-**Datenbasis:** Synthetischer Datensatz mit 137,990 Kooperationen
+**Generated on:** 2026-01-12
+**Script:** `scripts/explore_research_questions.py`
+**Data basis:** Synthetic dataset with 137,990 collaborations
 
 ---
 
-## Verzeichnisstruktur
+## Directory Structure
 
 ```
 docs/
-├── README.md                          (diese Datei - Übersicht)
-├── data/                              (Aggregierte Netzwerkdaten für Frontend)
-│   └── country_network.json           (7.2 MB, vollständige Länder-Netzwerkdaten + Metriken, 5,751 Kanten)
-└── exploration/                       (Explorationsergebnisse)
-    ├── DATA_DICTIONARY.md             (Vollständige Dokumentation aller Dateien)
-    ├── macro/                         (Makroebene: Länderanalysen)
-    │   ├── country_rankings.csv       (110 Länder nach Gewicht)
-    │   └── country_pairs_top20.csv    (Stärkste bilaterale Beziehungen)
-    ├── micro/                         (Mikroebene: Firmenanalysen)
-    │   ├── firm_bridge_candidates.csv (267k Firmen nach Bridge-Potenzial)
-    │   └── firm_rankings.csv          (Firmen nach Kooperationen)
-    ├── temporal/                      (Zeitreihen 2010-2018)
-    │   ├── temporal_overview.csv      (Jährliche Netzwerk-Statistiken)
-    │   └── temporal_top_countries.csv (Top-5 Länder pro Jahr)
-    └── structure/                     (Netzwerkstruktur-Eigenschaften)
-        ├── network_preview.csv        (Größe, Dichte pro Jahr)
-        └── weight_distribution.csv    (Quantile der Gewichte)
+├── README.md                          (this file - overview)
+├── data/                              (Aggregated network data for frontend)
+│   └── country_network.json           (7.2 MB, complete country network data + metrics, 5,751 edges)
+└── exploration/                       (Exploration results)
+    ├── DATA_DICTIONARY.md             (Complete documentation of all files)
+    ├── macro/                         (Macro level: Country analyses)
+    │   ├── country_rankings.csv       (110 countries by weight)
+    │   └── country_pairs_top20.csv    (Strongest bilateral relationships)
+    ├── micro/                         (Micro level: Firm analyses)
+    │   ├── firm_bridge_candidates.csv (267k firms by bridge potential)
+    │   └── firm_rankings.csv          (Firms by collaborations)
+    ├── temporal/                      (Time series 2010-2018)
+    │   ├── temporal_overview.csv      (Annual network statistics)
+    │   └── temporal_top_countries.csv (Top-5 countries per year)
+    └── structure/                     (Network structure properties)
+        ├── network_preview.csv        (Size, density per year)
+        └── weight_distribution.csv    (Quantiles of weights)
 ```
 
-**Für detaillierte Informationen:** Siehe [exploration/DATA_DICTIONARY.md](exploration/DATA_DICTIONARY.md)
+**For detailed information:** See [exploration/DATA_DICTIONARY.md](exploration/DATA_DICTIONARY.md)
 
 ---
 
-## Übersicht der Dateien
+## File Overview
 
-### Makroebene (Länder)
+### Macro Level (Countries)
 
 **`country_rankings.csv`**
-Ranking aller 110 Länder nach Gesamtgewicht der Kooperationen.
+Ranking of all 110 countries by total weight of collaborations.
 
-- **Top-3 Länder:** Taiwan (TW), Polen (PL), Ukraine (UA)
-- **Variablen:** country, total_weight, num_edges, unique_partners
+- **Top-3 Countries:** Taiwan (TW), Poland (PL), Ukraine (UA)
+- **Variables:** country, total_weight, num_edges, unique_partners
 
 **`country_pairs_top20.csv`**
-Die 20 stärksten bilateralen Länderbeziehungen.
+The 20 strongest bilateral country relationships.
 
-- **Stärkste Beziehung:** Costa Rica - Curacao (CR-CW, Gewicht: 228)
-- **Variablen:** country_a, country_b, total_weight, num_edges
+- **Strongest relationship:** Costa Rica - Curacao (CR-CW, weight: 228)
+- **Variables:** country_a, country_b, total_weight, num_edges
 
-### Mikroebene (Firmen)
+### Micro Level (Firms)
 
 **`firm_bridge_candidates.csv`**
-Alle 267,068 Firmen sortiert nach Anzahl einzigartiger Partnerländer (Bridge-Potenzial).
+All 267,068 firms sorted by number of unique partner countries (bridge potential).
 
-- **Top-Bridge:** CH257552054L (4 Partnerländer)
-- **Durchschnitt:** 1.03 Partnerländer pro Firma
-- **Variablen:** firm_id, home_country, num_partner_countries
+- **Top bridge:** CH257552054L (4 partner countries)
+- **Average:** 1.03 partner countries per firm
+- **Variables:** firm_id, home_country, num_partner_countries
 
 **`firm_rankings.csv`**
-Firmen-Rankings nach Gesamtanzahl Kooperationen.
+Firm rankings by total number of collaborations.
 
-- **Variablen:** firm_id, home_country, total_weight, num_edges
+- **Variables:** firm_id, home_country, total_weight, num_edges
 
-### Temporale Analysen
+### Temporal Analyses
 
 **`temporal_overview.csv`**
-Jährliche Netzwerk-Statistiken (2010-2018).
+Annual network statistics (2010-2018).
 
-- **Trend Firmen:** 30,246 (2010) → 30,492 (2018)
-- **Trend Kanten:** 15,173 → 15,304
-- **Variablen:** year, num_edges, unique_firms_approx, unique_countries_approx, total_weight, mean_weight, median_weight
+- **Firm trend:** 30,246 (2010) → 30,492 (2018)
+- **Edge trend:** 15,173 → 15,304
+- **Variables:** year, num_edges, unique_firms_approx, unique_countries_approx, total_weight, mean_weight, median_weight
 
 **`temporal_top_countries.csv`**
-Top-5 Länder pro Jahr nach Gesamtgewicht.
+Top-5 countries per year by total weight.
 
-- Zeigt Auf-/Abstiege einzelner Länder über Zeit
-- **Variablen:** year, rank, country, total_weight
+- Shows rise/fall of individual countries over time
+- **Variables:** year, rank, country, total_weight
 
-### Netzwerkstruktur
+### Network Structure
 
 **`network_preview.csv`**
-Strukturelle Eigenschaften pro Jahr auf Firmen- und Länderebene.
+Structural properties per year at firm and country level.
 
-- **Firmennetzwerk-Dichte:** ~0.000033 (sehr dünn)
-- **Ländernetzwerk-Dichte:** ~0.873 (sehr dicht)
-- **Variablen:** year, firms_nodes, firms_edges, firms_density, countries_nodes, countries_edges, countries_density
+- **Firm network density:** ~0.000033 (very sparse)
+- **Country network density:** ~0.873 (very dense)
+- **Variables:** year, firms_nodes, firms_edges, firms_density, countries_nodes, countries_edges, countries_density
 
 **`weight_distribution.csv`**
-Quantile der Gewichtsverteilung.
+Quantiles of weight distribution.
 
 - **Median:** 4
-- **95%-Quantil:** 7
-- **Verteilung:** Rechtsschief
-- **Variablen:** quantile, weight
+- **95% quantile:** 7
+- **Distribution:** Right-skewed
+- **Variables:** quantile, weight
 
 ---
 
-## Kernerkenntnisse
+## Key Findings
 
-### Makroebene: Länder
+### Macro Level: Countries
 
-- **110 unique Länder** im Netzwerk identifiziert
-- **Top-3 Länder** nach Gesamtgewicht: Taiwan (TW), Polen (PL), Ukraine (UA)
-- **Stärkste bilaterale Beziehung:** Costa Rica - Curacao (CR-CW)
-- **Internationale Dominanz:** >99% aller Kooperationen sind grenzüberschreitend (durchgängig über alle Jahre)
-- **Hohe Dichte:** Ländernetzwerk hat Dichte ~0.87 → fast vollständig verbunden
+- **110 unique countries** identified in the network
+- **Top-3 countries** by total weight: Taiwan (TW), Poland (PL), Ukraine (UA)
+- **Strongest bilateral relationship:** Costa Rica - Curacao (CR-CW)
+- **International dominance:** >99% of all collaborations are cross-border (consistent across all years)
+- **High density:** Country network has density ~0.87 → almost fully connected
 
-### Mikroebene: Firmen
+### Micro Level: Firms
 
-- **267,068 unique Firmen** identifiziert
-- **Bridge-Kandidaten:** Top-Firma kooperiert mit 4 verschiedenen Ländern
-- **Durchschnitt:** 1.03 Partnerländer pro Firma → die meisten Firmen kooperieren nur mit einem Land
-- **Degree-Verteilung:** Median=1, 99%-Quantil=2 → sehr wenige hochvernetzte Firmen
-- **Firmennetzwerk sehr dünn:** Dichte ~0.000033 (typisch für große Netzwerke)
+- **267,068 unique firms** identified
+- **Bridge candidates:** Top firm collaborates with 4 different countries
+- **Average:** 1.03 partner countries per firm → most firms collaborate with only one country
+- **Degree distribution:** Median=1, 99% quantile=2 → very few highly connected firms
+- **Firm network very sparse:** Density ~0.000033 (typical for large networks)
 
-### Temporale Entwicklung
+### Temporal Evolution
 
-- **Zeitraum:** 2010-2018
-- **Leichtes Wachstum:** Firmen +0.8%, Kanten +0.9%
-- **Stabile Struktur:** Anzahl Länder konstant bei 110, Gewichtsverteilung stabil
-- **Top-Länder variieren** zwischen Jahren (kein dominanter Akteur über gesamten Zeitraum)
+- **Time period:** 2010-2018
+- **Slight growth:** Firms +0.8%, edges +0.9%
+- **Stable structure:** Number of countries constant at 110, weight distribution stable
+- **Top countries vary** between years (no dominant actor over entire period)
 
-### Netzwerkstruktur
+### Network Structure
 
-- **Gewichte rechtsschief verteilt:** Median=4, aber 95%-Quantil=7, Max=14
-- **Log-Transformation sinnvoll** für Visualisierungen (reduziert Schiefe von σ=1.71 auf σ=0.36)
-- **Zwei sehr unterschiedliche Netzwerk-Ebenen:**
-  - Länderebene: Klein (110 Knoten), dicht (87%), gut handhabbar
-  - Firmenebene: Groß (267k Knoten), dünn (0.003%), rechenintensiv
-
----
-
-## Methodische Empfehlungen
-
-### 1. Gewichtstransformation
-
-**Problem:** Rechtsschiefe Verteilung (Standardabweichung 1.71)
-
-**Empfehlung:**
-- Für Visualisierungen: `log(weight+1)` verwenden (reduziert σ auf 0.36)
-- Für Metriken: Gewichtete Varianten wo sinnvoll, aber raw weights für Interpretierbarkeit
-
-### 2. Tool-Auswahl
-
-**Länderebene (~110 Knoten):**
-- **NetworkX** ausreichend und gut performant
-- Alle Metriken (Centrality, Communities) ohne Performance-Probleme berechenbar
-
-**Firmenebene (~267k Knoten):**
-- **NetworkX** funktioniert, aber langsam bei komplexen Metriken
-- **igraph** für schnellere Berechnungen erwägen
-- **Alternative:** Top-N-Subgraph-Analyse statt vollständigem Netzwerk
-
-### 3. Temporale Analyse
-
-**Empfehlung:** Beide Ansätze parallel nutzen
-
-- **Jährliche Snapshots:** Zeigen Dynamik und Trends (2010 vs. 2018)
-- **Kumulatives Netzwerk:** Zeigt Gesamtstruktur und persistente Muster
-- **Vergleichsperioden:** 2010-2014 vs. 2015-2018
-
-### 4. Forschungsfragen-Priorisierung
-
-Alle drei Hauptfragen haben gute Datenbasis:
-
-1. **Makro-Zentralität (Länder):** ✅ Hohe Priorität
-   - Klare Top-Länder identifiziert
-   - Dichte Netzwerkstruktur → gute Community-Struktur erwartbar
-
-2. **Bridge-Firmen (Mikro):** ✅ Gute Basis
-   - Klare Kandidaten identifiziert
-   - Wenige hochvernetzte Firmen → interessante Analyse möglich
-
-3. **Temporale Entwicklung:** ✅ Lohnt sich
-   - Trends erkennbar (wenn auch moderat)
-   - Top-Länder variieren → Dynamik vorhanden
+- **Weights right-skewed:** Median=4, but 95% quantile=7, Max=14
+- **Log transformation useful** for visualizations (reduces skewness from σ=1.71 to σ=0.36)
+- **Two very different network levels:**
+  - Country level: Small (110 nodes), dense (87%), easily manageable
+  - Firm level: Large (267k nodes), sparse (0.003%), computationally intensive
 
 ---
 
-## Beantwortete offene Fragen
+## Methodological Recommendations
 
-Aus `knowledge/data.md`:
+### 1. Weight Transformation
 
-✅ **Weight-Verteilung:** Bestätigt als Median=4, Durchschnitt=3.91, Range 1-14, rechtsschief
+**Problem:** Right-skewed distribution (standard deviation 1.71)
 
-✅ **Internationale Dominanz:** Bestätigt über alle Jahre (>99% durchgängig)
+**Recommendation:**
+- For visualizations: Use `log(weight+1)` (reduces σ to 0.36)
+- For metrics: Weighted variants where appropriate, but raw weights for interpretability
 
-✅ **Netzwerkgrößen:** Dokumentiert pro Jahr für informierte Tool-Entscheidungen
+### 2. Tool Selection
 
-✅ **Duplikate:** Keine gefunden (wie erwartet aus vorheriger Verifikation)
+**Country level (~110 nodes):**
+- **NetworkX** sufficient and well-performing
+- All metrics (Centrality, Communities) computable without performance issues
 
----
+**Firm level (~267k nodes):**
+- **NetworkX** works but slow for complex metrics
+- **igraph** worth considering for faster computations
+- **Alternative:** Top-N subgraph analysis instead of full network
 
-## Nächste Schritte
+### 3. Temporal Analysis
 
-Basierend auf dieser Exploration:
+**Recommendation:** Use both approaches in parallel
 
-1. **US-02:** Aggregation auf Länderebene implementieren
-   - Grundlage vorhanden: `country_pairs_top20.csv` zeigt benötigte Struktur
-   - Summation der weights pro Länderpaar und Jahr
+- **Annual snapshots:** Show dynamics and trends (2010 vs. 2018)
+- **Cumulative network:** Shows overall structure and persistent patterns
+- **Comparison periods:** 2010-2014 vs. 2015-2018
 
-2. **US-03:** Netzwerkobjekte erstellen (Länderebene)
-   - NetworkX ausreichend für ~110 Knoten
-   - Ungerichtetes, gewichtetes Netzwerk
+### 4. Research Question Prioritization
 
-3. **US-04:** Netzwerkobjekte erstellen (Firmenebene)
-   - **Entscheidung nötig:** Vollständig oder Top-N-Subgraph?
-   - igraph für Performance erwägen bei vollständiger Analyse
+All three main questions have good data basis:
 
-4. **US-05-07:** Metriken berechnen
-   - Basis vorhanden, methodische Entscheidungen getroffen
+1. **Macro centrality (Countries):** ✅ High priority
+   - Clear top countries identified
+   - Dense network structure → good community structure expected
 
----
+2. **Bridge firms (Micro):** ✅ Good basis
+   - Clear candidates identified
+   - Few highly connected firms → interesting analysis possible
 
-## Datenqualität & Limitationen
-
-**Synthetischer Datensatz:**
-- Diese Analysen basieren auf synthetischen Daten
-- Strukturelle Eigenschaften können vom Original abweichen
-- Länder-Codes und Gewichte möglicherweise nicht repräsentativ
-
-**Bekannte Artefakte:**
-- Ungewöhnlich gleichmäßige Verteilung der Top-Länder (alle ~11,600-12,000 Gewicht)
-- Ungewöhnliche Top-Länder (TW, PL, UA statt erwartete US, CN, DE)
-- 99%+ internationale Kooperationen könnte Datenerhebungsartefakt sein
-
-**Für echte Analysen:**
-- Alle Schritte mit echten Daten wiederholen
-- Ergebnisse inhaltlich validieren (sind Top-Länder plausibel?)
-- Zusätzliche Qualitätsprüfungen durchführen
+3. **Temporal evolution:** ✅ Worthwhile
+   - Trends visible (though moderate)
+   - Top countries vary → dynamics present
 
 ---
 
+## Answered Open Questions
+
+From `knowledge/data.md`:
+
+✅ **Weight distribution:** Confirmed as Median=4, Mean=3.91, Range 1-14, right-skewed
+
+✅ **International dominance:** Confirmed across all years (>99% consistent)
+
+✅ **Network sizes:** Documented per year for informed tool decisions
+
+✅ **Duplicates:** None found (as expected from prior verification)
+
 ---
 
-## Interaktive Visualisierung
+## Next Steps
+
+Based on this exploration:
+
+1. **US-02:** Implement country-level aggregation
+   - Foundation available: `country_pairs_top20.csv` shows required structure
+   - Summation of weights per country pair and year
+
+2. **US-03:** Create network objects (country level)
+   - NetworkX sufficient for ~110 nodes
+   - Undirected, weighted network
+
+3. **US-04:** Create network objects (firm level)
+   - **Decision needed:** Full or top-N subgraph?
+   - Consider igraph for performance in full analysis
+
+4. **US-05-07:** Calculate metrics
+   - Foundation available, methodological decisions made
+
+---
+
+## Data Quality & Limitations
+
+**Synthetic Dataset:**
+- These analyses are based on synthetic data
+- Structural properties may differ from the original
+- Country codes and weights possibly not representative
+
+**Known Artifacts:**
+- Unusually uniform distribution of top countries (all ~11,600-12,000 weight)
+- Unusual top countries (TW, PL, UA instead of expected US, CN, DE)
+- 99%+ international collaborations could be data collection artifact
+
+**For real analyses:**
+- Repeat all steps with real data
+- Validate results substantively (are top countries plausible?)
+- Perform additional quality checks
+
+---
+
+---
+
+## Interactive Visualization
 
 **Frontend:** [index.html](index.html) (GitHub Pages)
 
-Vollständig interaktive d3.js-basierte Visualisierung des Patent-Kooperationsnetzwerks mit 3-Tab-Navigation:
+Fully interactive d3.js-based visualization of the patent cooperation network with 3-tab navigation:
 
-**Tab 1: Netzwerk-Analyse**
-- **Force-Directed Network** (VIS-1A): 110 Länder, ~5,751 internationale Kooperationen
-  - Node Size = Weighted Degree, Color = Region (7 geografische Regionen)
-  - Zoom/Pan, Drag, Tooltips mit 4 Centrality-Metriken
-  - Ego-Network Highlighting (Click auf Node)
-  - Edge Weight Filter (Schwellenwert 1-14)
+**Tab 1: Network Analysis**
+- **Force-Directed Network** (VIS-1A): 110 countries, ~5,751 international collaborations
+  - Node Size = Weighted Degree, Color = Region (7 geographic regions)
+  - Zoom/Pan, Drag, Tooltips with 4 Centrality metrics
+  - Ego-Network Highlighting (Click on Node)
+  - Edge Weight Filter (threshold 1-14)
 - **Country Ranking** (VIS-1B): Top-N Bar Chart (10/20/50/All)
-  - 4 Centrality-Metriken wählbar: Degree, Betweenness, Closeness, Eigenvector
-  - Region-basierte Farbkodierung
+  - 4 Centrality metrics selectable: Degree, Betweenness, Closeness, Eigenvector
+  - Region-based color coding
 - **Temporal Metrics** (VIS-3A): Small Multiples (2x2 Grid)
   - Density, Modularity, Num Communities, Avg Clustering (2010-2018)
-- **Controls**: Time Slider (2010-2018 + kumulativ), Centrality Selector, Top-N Selector, Edge Weight Filter
+- **Controls**: Time Slider (2010-2018 + cumulative), Centrality Selector, Top-N Selector, Edge Weight Filter
 
-**Tab 2: Temporale Entwicklung**
+**Tab 2: Temporal Evolution**
 - **Slopegraph** (VIS-3B): Rank Changes 2010 → 2018
-  - Line Color: Grün = Improved, Rot = Worsened, Grau = Unchanged
-  - Line Thickness proportional zu abs(ΔRank)
-  - Tooltips mit Rank 2010/2018, ΔRank, Centrality 2010/2018, Δ Centrality
-  - Centrality Selector (4 Metriken), Top-N Selector (10/20/50)
-- **Temporal Metrics** (VIS-3A): Small Multiples (wiederverwendet)
+  - Line Color: Green = Improved, Red = Worsened, Gray = Unchanged
+  - Line Thickness proportional to abs(ΔRank)
+  - Tooltips with Rank 2010/2018, ΔRank, Centrality 2010/2018, Δ Centrality
+  - Centrality Selector (4 metrics), Top-N Selector (10/20/50)
+- **Temporal Metrics** (VIS-3A): Small Multiples (reused)
 
-**Tab 3: Bridge-Länder**
+**Tab 3: Bridge Countries**
 - **Bridge Evolution** (VIS-4): Slopegraph 2010 → 2018
-  - Sortiert nach Betweenness Centrality (Bridge-Indikator)
-  - Line Color: Grün = Improved, Rot = Worsened, Grau = Unchanged
-  - Line Thickness proportional zu abs(ΔRank)
-  - Tooltips mit Rank 2010/2018, ΔRank, Betweenness 2010/2018, Δ Betweenness
+  - Sorted by Betweenness Centrality (bridge indicator)
+  - Line Color: Green = Improved, Red = Worsened, Gray = Unchanged
+  - Line Thickness proportional to abs(ΔRank)
+  - Tooltips with Rank 2010/2018, ΔRank, Betweenness 2010/2018, Δ Betweenness
   - Top-N Selector (10/20/50)
-- **Temporal Metrics** (VIS-3A): Small Multiples (wiederverwendet)
-- **Hinweis:** Firmenebene-Daten (US-04) nicht verfügbar, Länderebene als Proxy
+- **Temporal Metrics** (VIS-3A): Small Multiples (reused)
+- **Note:** Firm-level data (US-04) not available, country level as proxy
 
-**Tab 4: Daten & Methodik**
-- **Data Aggregation Pipeline**: Visueller Workflow (RDS → Python → JSON)
+**Tab 4: Data & Methodology**
+- **Data Aggregation Pipeline**: Visual workflow (RDS → Python → JSON)
   - 3-Step Flowchart: Raw Data, Processing, Output
-  - Details zu Input/Output-Formaten
-- **Network Metrics Definitions**: Formeln + Interpretationen
-  - Degree Centrality: Anzahl direkter Connections
-  - Betweenness Centrality: Bridge-Positionen
-  - Closeness Centrality: Durchschnittsdistanz
-  - Eigenvector Centrality: Connections zu wichtigen Nodes
-- **Data Quality Warnings**: Transparente Limitationen
-  - ⚠️ Synthetic Data Notice (Placeholder-Daten)
-  - 🔴 Network Density 95.9% (unrealistisch hoch)
-  - 🔴 Modularity 0.010 (Community Detection failed)
+  - Details on input/output formats
+- **Network Metrics Definitions**: Formulas + interpretations
+  - Degree Centrality: Number of direct connections
+  - Betweenness Centrality: Bridge positions
+  - Closeness Centrality: Average distance
+  - Eigenvector Centrality: Connections to important nodes
+- **Data Quality Warnings**: Transparent limitations
+  - ⚠️ Synthetic Data Notice (placeholder data)
+  - 🔴 Network Density 95.9% (unrealistically high)
+  - 🔴 Modularity 0.010 (community detection failed)
   - ℹ️ Temporal Snapshots (2010-2018, 9 years annual)
-- **Documentation Embed**: Collapsible Markdown-Viewer
+- **Documentation Embed**: Collapsible Markdown viewer
   - 📄 data.md (Data Structure & Variables)
   - 📄 research.md (Research Questions & Context)
   - 📄 requirements.md (User Stories & Requirements)
-  - Lazy Loading via fetch(), basic Markdown→HTML conversion
+  - Lazy loading via fetch(), basic Markdown→HTML conversion
 
-**Technologie:**
+**Technology:**
 - d3.js v7 (Force Simulation, Data Join, Scales, Zoom, Slopegraph)
-- CSS Grid + Flexbox (70/30 Layout), Tab-Navigation (CSS-only)
+- CSS Grid + Flexbox (70/30 Layout), Tab Navigation (CSS-only)
 - Vanilla JavaScript (ES6+), Lazy Initialization
 
-**Datengrundlage:**
-- `data/country_network.json` (7.2 MB, 9 Jahre + kumulativ)
-- Vollständige Netzwerkmetriken (Centrality, Communities, Global Metrics)
+**Data Source:**
+- `data/country_network.json` (7.2 MB, 9 years + cumulative)
+- Complete network metrics (Centrality, Communities, Global Metrics)
 
-**Region-basierte Farbkodierung:**
-- Europa (Blau), Asien (Grün), Nordamerika (Rot), Süd-/Mittelamerika (Violett)
-- Afrika (Orange), Ozeanien (Türkis), Naher Osten (Braun)
-- Ersetzt Community-basierte Farben (Modularity 0.010 statistisch bedeutungslos)
+**Region-based Color Coding:**
+- Europe (Blue), Asia (Green), North America (Red), South/Central America (Purple)
+- Africa (Orange), Oceania (Turquoise), Middle East (Brown)
+- Replaces community-based colors (Modularity 0.010 statistically meaningless)
 
-**Code-Statistiken (nach Session 10 Refactoring):**
-- docs/index.html: 294 Zeilen
-- docs/styles.css: 453 Zeilen
-- docs/app.js: 1081 Zeilen (-204 / -15.9% durch Code-Deduplication)
+**Code Statistics (after Session 10 Refactoring):**
+- docs/index.html: 294 lines
+- docs/styles.css: 453 lines
+- docs/app.js: 1081 lines (-204 / -15.9% through code deduplication)
 
-**⚠️ Hinweis:** Die Visualisierung basiert auf synthetischen Daten mit bekannten Artefakten (siehe unten). Strukturelle Eigenschaften (hohe Dichte, niedrige Modularity) sind nicht repräsentativ für reale Patent-Netzwerke.
+**⚠️ Note:** The visualization is based on synthetic data with known artifacts (see below). Structural properties (high density, low modularity) are not representative of real patent networks.
 
 ---
 
-## Kontakt & Dokumentation
+## Contact & Documentation
 
-**Projektdokumentation:** `knowledge/` Ordner
-- `data.md` - Datenstruktur und -eigenschaften
-- `research.md` - Forschungsfragen und Methodik
-- `requirements.md` - User Stories und Technologie-Stack
-- `journal.md` - Prozessdokumentation und Learnings
-- `design.md` - InfoVis Design-Spezifikation
+**Project documentation:** `knowledge/` folder
+- `data.md` - Data structure and properties
+- `research.md` - Research questions and methodology
+- `requirements.md` - User stories and technology stack
+- `journal.md` - Process documentation and learnings
+- `design.md` - InfoVis design specification
 
-**Skripte:**
-- `scripts/explore_research_questions.py` - Initiale Exploration
-- `scripts/aggregate_country_network.py` - Länder-Aggregation + Netzwerkmetriken
+**Scripts:**
+- `scripts/explore_research_questions.py` - Initial exploration
+- `scripts/aggregate_country_network.py` - Country aggregation + network metrics
 
-**Methodik:** Promptotyping (siehe `CLAUDE.md`)
+**Methodology:** Promptotyping (see `CLAUDE.md`)

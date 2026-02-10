@@ -1,119 +1,119 @@
 # research.md
 
-## Forschungskontext
+## Research Context
 
-Netzwerkanalyse von Patentkooperationen zwischen Firmen auf internationaler Ebene. Ziel ist die Berechnung von Netzwerkmetriken und deren Visualisierung für eine Publikation.
+Network analysis of patent cooperations between firms at international level. Goal is the calculation of network metrics and their visualization for publication.
 
-## Forschungsfragen
+## Research Questions
 
-**Makroebene (Länder)**
-- Welche Länder sind zentrale Akteure in internationalen Patentkooperationen?
-- Gibt es regionale Cluster oder Communities von Ländern mit intensiver Zusammenarbeit?
-- Wie hat sich die Netzwerkstruktur zwischen 2010 und 2018 verändert?
+**Macro Level (Countries)**
+- Which countries are central actors in international patent cooperations?
+- Are there regional clusters or communities of countries with intensive collaboration?
+- How has the network structure changed between 2010 and 2018?
 
-**Mikroebene (Firmen)**
-- Welche Firmen fungieren als Brücken zwischen verschiedenen Ländern oder Communities?
-- Gibt es Unterschiede in den Kooperationsmustern zwischen Firmen aus verschiedenen Ländern?
+**Micro Level (Firms)**
+- Which firms act as bridges between different countries or communities?
+- Are there differences in cooperation patterns between firms from different countries?
 
-## Netzwerkmetriken
+## Network Metrics
 
-**Zentralitätsmaße**
+**Centrality Measures**
 
-*Degree Centrality* zählt die Anzahl direkter Verbindungen eines Knotens. Hoher Degree bedeutet viele Kooperationspartner. Sagt nichts über die strategische Position im Netzwerk.
+*Degree Centrality* counts the number of direct connections of a node. High degree means many cooperation partners. Says nothing about strategic position in the network.
 
-*Betweenness Centrality* misst, wie oft ein Knoten auf kürzesten Pfaden zwischen anderen Knoten liegt. Hohe Betweenness identifiziert Broker und Gatekeeper, die Informationsflüsse kontrollieren können.
+*Betweenness Centrality* measures how often a node lies on shortest paths between other nodes. High betweenness identifies brokers and gatekeepers who can control information flows.
 
-*Eigenvector Centrality* gewichtet Verbindungen nach der Zentralität der Nachbarn. Ein Knoten ist zentral, wenn seine Partner zentral sind. Identifiziert Akteure in einflussreichen Netzwerkregionen.
+*Eigenvector Centrality* weights connections by the centrality of neighbors. A node is central if its partners are central. Identifies actors in influential network regions.
 
-*Closeness Centrality* misst die durchschnittliche Distanz zu allen anderen Knoten. Hohe Closeness bedeutet schnellen Zugang zum gesamten Netzwerk.
+*Closeness Centrality* measures the average distance to all other nodes. High closeness means fast access to the entire network.
 
 **Community Detection**
 
-*Louvain-Algorithmus* optimiert Modularität durch iteratives Zusammenfassen von Knoten. Schnell, skaliert gut, aber nicht deterministisch.
+*Louvain Algorithm* optimizes modularity through iterative merging of nodes. Fast, scales well, but not deterministic.
 
-*Infomap* basiert auf Random Walks und Informationstheorie. Findet Communities, in denen Information lange zirkuliert. Oft genauer als Louvain bei überlappenden Strukturen.
+*Infomap* is based on Random Walks and information theory. Finds communities where information circulates for a long time. Often more accurate than Louvain with overlapping structures.
 
-**Globale Eigenschaften**
+**Global Properties**
 
-*Density* ist der Anteil realisierter Kanten an allen möglichen Kanten. Niedrige Dichte ist typisch für große Netzwerke.
+*Density* is the proportion of realized edges to all possible edges. Low density is typical for large networks.
 
-*Average Path Length* ist die durchschnittliche kürzeste Distanz zwischen Knotenpaaren. Kurze Pfade deuten auf Small-World-Eigenschaften hin.
+*Average Path Length* is the average shortest distance between node pairs. Short paths indicate small-world properties.
 
-*Clustering Coefficient* misst, wie stark Nachbarn eines Knotens untereinander verbunden sind. Hohe Werte zeigen lokale Verdichtung.
+*Clustering Coefficient* measures how strongly neighbors of a node are connected to each other. High values show local densification.
 
-*Assortativity* misst, ob ähnliche Knoten bevorzugt verbunden sind (z.B. Länder mit ähnlichem Entwicklungsstand).
+*Assortativity* measures whether similar nodes are preferentially connected (e.g., countries with similar development level).
 
-## Methodische Entscheidungen
+## Methodological Decisions
 
-**Gerichtet vs. ungerichtet:** Ungerichtet. Patentkooperationen sind symmetrisch, owner1 und owner2 sind austauschbar. Datenverifikation bestätigt: keine duplizierten Paare vorhanden.
+**Directed vs. undirected:** Undirected. Patent cooperations are symmetric, owner1 and owner2 are interchangeable. Data verification confirms: no duplicated pairs present.
 
-**Gewichtung:** Kanten sind gewichtet (1-14). Metriken sollten gewichtete Varianten verwenden wo sinnvoll. Median=4, Durchschnitt=3.91, rechtsschief verteilt.
+**Weighting:** Edges are weighted (1-14). Metrics should use weighted variants where appropriate. Median=4, mean=3.91, right-skewed distribution.
 
-**Temporale Analyse:** Netzwerke pro Jahr separat berechnen oder kumulativ? Beides hat Berechtigung. Jährliche Snapshots zeigen Dynamik, kumulative Netzwerke zeigen Gesamtstruktur.
+**Temporal analysis:** Calculate networks per year separately or cumulatively? Both have justification. Annual snapshots show dynamics, cumulative networks show overall structure.
 
-**Aggregation Firmen zu Ländern:** Summation der weights pro Länderpaar und Jahr. Alternativen wären Durchschnitt oder Anzahl der Firmenpaare.
+**Aggregation firms to countries:** Summation of weights per country pair and year. Alternatives would be average or number of firm pairs.
 
 ## Tooling (Python)
 
-**Netzwerkanalyse**
+**Network Analysis**
 
-*NetworkX* für Netzwerkberechnung und alle Metriken (Degree, Betweenness, Eigenvector, Closeness). Standard-Bibliothek, gut dokumentiert, alle Algorithmen verfügbar.
+*NetworkX* for network computation and all metrics (Degree, Betweenness, Eigenvector, Closeness). Standard library, well documented, all algorithms available.
 
-*igraph (Python-Binding)* als performantere Alternative für sehr große Netzwerke. Schneller als NetworkX bei >100k Knoten.
+*igraph (Python binding)* as more performant alternative for very large networks. Faster than NetworkX with >100k nodes.
 
-*graph-tool* für maximale Performance bei Millionen Knoten. Kompiliert (C++), komplexere Installation.
+*graph-tool* for maximum performance with millions of nodes. Compiled (C++), more complex installation.
 
 **Community Detection**
 
-NetworkX: Louvain via `python-louvain` oder `networkx.algorithms.community`.
+NetworkX: Louvain via `python-louvain` or `networkx.algorithms.community`.
 
-Infomap: Dediziertes Python-Package `infomap`.
+Infomap: Dedicated Python package `infomap`.
 
-Alternativen: Leiden-Algorithmus via `leidenalg` (noch besser als Louvain).
+Alternatives: Leiden algorithm via `leidenalg` (even better than Louvain).
 
-**Visualisierung**
+**Visualization**
 
-*Matplotlib + NetworkX* für einfache statische Plots.
+*Matplotlib + NetworkX* for simple static plots.
 
-*Plotly* für interaktive Netzwerke mit Hover-Informationen und Zoom.
+*Plotly* for interactive networks with hover information and zoom.
 
-*PyVis* für browserbasierte interaktive Visualisierung (nutzt vis.js).
+*PyVis* for browser-based interactive visualization (uses vis.js).
 
-*Gephi* (extern) für explorative Visualisierung großer Netzwerke, Python-Export via `networkx.write_gexf()`.
+*Gephi* (external) for exploratory visualization of large networks, Python export via `networkx.write_gexf()`.
 
-**Layoutalgorithmen**
+**Layout Algorithms**
 
-NetworkX bietet: `spring_layout` (Fruchterman-Reingold), `kamada_kawai_layout`, `circular_layout`, `spectral_layout`.
+NetworkX offers: `spring_layout` (Fruchterman-Reingold), `kamada_kawai_layout`, `circular_layout`, `spectral_layout`.
 
-Für sehr große Netzwerke (>10k Knoten): `fa2` (ForceAtlas2) via `fa2` Package oder Graph-tool.
+For very large networks (>10k nodes): `fa2` (ForceAtlas2) via `fa2` package or graph-tool.
 
-Hinweis: Firmennetzwerk mit ~134,000 Knoten → Subgraph-Analyse, Aggregation auf Länderebene, oder spezialisierte Layouts (FA2, DrL via graph-tool) notwendig.
+Note: Firm network with ~134,000 nodes → subgraph analysis, aggregation to country level, or specialized layouts (FA2, DrL via graph-tool) necessary.
 
-## Limitationen
+## Limitations
 
-Korrelation zwischen Zentralität und Innovationserfolg ist nicht kausal ableitbar.
+Correlation between centrality and innovation success is not causally inferable.
 
-Patentkooperationen sind nur ein Indikator für Wissensflüsse. Andere Formen (Lizenzierung, informeller Austausch, Personalwechsel) sind nicht erfasst.
+Patent cooperations are only one indicator for knowledge flows. Other forms (licensing, informal exchange, personnel changes) are not captured.
 
-Die Aggregation auf Länderebene verdeckt Heterogenität innerhalb von Ländern.
+Aggregation to country level obscures heterogeneity within countries.
 
-Synthetische Daten können strukturelle Eigenschaften des Originalnetzwerks verzerren.
+Synthetic data can distort structural properties of the original network.
 
-99.15% internationale Kooperationen: Möglicherweise Artefakt der Datenerhebung (nationale Kooperationen systematisch unterrepräsentiert?).
+99.15% international cooperations: Possibly artifact of data collection (national cooperations systematically underrepresented?).
 
-## Offene Fragen
+## Open Questions
 
-**Forschungspriorisierung**
-- Welche Forschungsfragen haben Priorität für die Publikation?
-- Gibt es theoretische Vorannahmen über erwartete Netzwerkstrukturen?
-- Sollen bestimmte Länder oder Zeiträume fokussiert werden?
+**Research Prioritization**
+- Which research questions have priority for publication?
+- Are there theoretical assumptions about expected network structures?
+- Should certain countries or time periods be focused on?
 
-**Dateninterpretation**
-- Was bedeutet `weight` exakt? Anzahl gemeinsamer Patente, Kollaborationen, oder ein Score/Index?
-- Ist `weight` bereits pro Firmenpaar und Jahr aggregiert oder können theoretisch Duplikate existieren? (Verifikation zeigt: keine Duplikate)
-- Wie wurden die synthetischen Daten erzeugt? Bleiben strukturelle Eigenschaften (Degree Distribution, Clustering) erhalten?
+**Data Interpretation**
+- What does `weight` mean exactly? Number of shared patents, collaborations, or a score/index?
+- Is `weight` already aggregated per firm pair and year, or could duplicates theoretically exist? (Verification shows: no duplicates)
+- How were the synthetic data generated? Are structural properties (degree distribution, clustering) preserved?
 
-**Methodische Details**
-- Bei gewichteten Metriken: Gewichte direkt verwenden oder transformieren (log, Normalisierung)?
-- Community Detection: Welcher Algorithmus hat Priorität? (Louvain schneller, Infomap oft präziser)
-- Temporale Analyse: Jährliche Snapshots oder kumulative Fenster (z.B. 3-Jahres-Perioden)?
+**Methodological Details**
+- For weighted metrics: Use weights directly or transform (log, normalization)?
+- Community detection: Which algorithm has priority? (Louvain faster, Infomap often more precise)
+- Temporal analysis: Annual snapshots or cumulative windows (e.g., 3-year periods)?

@@ -1,61 +1,61 @@
 # data.md
 
-## Datei
+## File
 
-**Pfad:** `data/db_networkCoPat_fake.rds`
+**Path:** `data/db_networkCoPat_fake.rds`
 **Format:** RDS (R Data Serialization)
-**Größe:** ~2.8 MB
-**Zeilen:** 137,990
-**Zeitraum:** 2010–2018
+**Size:** ~2.8 MB
+**Rows:** 137,990
+**Time Period:** 2010–2018
 
-Dies ist ein synthetischer Datensatz für Cloud-basierte Entwicklung. Echte Daten verbleiben lokal und werden nie in Cloud-Umgebungen hochgeladen.
+This is a synthetic dataset for cloud-based development. Real data remains local and is never uploaded to cloud environments.
 
-## Struktur
+## Structure
 
-Edge-List von Patentkooperationen zwischen Firmen.
+Edge list of patent cooperations between firms.
 
-| Variable | Typ | Beschreibung |
-|----------|-----|--------------|
-| `year_application` | integer | Jahr der Patentanmeldung |
-| `owner1` | character | Firmen-ID (Kooperationspartner 1) |
-| `country_1` | character | ISO2-Ländercode von owner1 |
-| `owner2` | character | Firmen-ID (Kooperationspartner 2) |
-| `country_2` | character | ISO2-Ländercode von owner2 |
-| `weight` | integer | Anzahl der Kollaborationen zwischen den Firmen in diesem Jahr |
+| Variable | Type | Description |
+|----------|------|-------------|
+| `year_application` | integer | Year of patent application |
+| `owner1` | character | Firm ID (cooperation partner 1) |
+| `country_1` | character | ISO2 country code of owner1 |
+| `owner2` | character | Firm ID (cooperation partner 2) |
+| `country_2` | character | ISO2 country code of owner2 |
+| `weight` | integer | Number of collaborations between firms in this year |
 
-Hinweis: Python (pyreadr) liest integer-Spalten teilweise als float64. Die Quelldefinition in R ist integer.
+Note: Python (pyreadr) reads integer columns partially as float64. The source definition in R is integer.
 
-## Netzwerkeigenschaften
+## Network Properties
 
-**Knoten:** ~134,000 eindeutige Firmen (owner IDs)
-**Kanten:** 137,990 Verbindungen
-**Typ:** Ungerichtet, gewichtet
-**Selbstverbindungen:** Keine (owner1 != owner2 in allen Zeilen)
-**Duplikate:** Keine
+**Nodes:** ~134,000 unique firms (owner IDs)
+**Edges:** 137,990 connections
+**Type:** Undirected, weighted
+**Self-connections:** None (owner1 != owner2 in all rows)
+**Duplicates:** None
 
-## Länderverteilung
+## Country Distribution
 
-**Länder (owner1):** 96
-**Länder (owner2):** 92
-**Grenzüberschreitend:** 99.15% (136,823 Kanten)
-**Innerhalb eines Landes:** 0.85% (1,167 Kanten)
+**Countries (owner1):** 96
+**Countries (owner2):** 92
+**Cross-border:** 99.15% (136,823 edges)
+**Within one country:** 0.85% (1,167 edges)
 
-## Gewichtung
+## Weighting
 
-**Bereich:** 1–14
+**Range:** 1–14
 **Median:** 4
-**Durchschnitt:** 3.91
-**Verteilung:** Rechtsschief, Schwerpunkt bei 2–5
+**Mean:** 3.91
+**Distribution:** Right-skewed, concentration at 2–5
 
-## Aggregationsebenen
+## Aggregation Levels
 
-Die Daten können auf zwei Ebenen analysiert werden.
+The data can be analyzed at two levels.
 
-**Firmenebene (disaggregiert):** Netzwerk zwischen einzelnen Firmen. ~134,000 Knoten.
+**Firm level (disaggregated):** Network between individual firms. ~134,000 nodes.
 
-**Länderebene (aggregiert):** Summation der weights pro Länderpaar und Jahr. ~96 Knoten.
+**Country level (aggregated):** Summation of weights per country pair and year. ~96 nodes.
 
-## Lesen der Daten
+## Reading the Data
 
 R:
 ```r
@@ -69,18 +69,18 @@ result = pyreadr.read_r("data/db_networkCoPat_fake.rds")
 df = result[None]
 ```
 
-## Output-Daten (JSON)
+## Output Data (JSON)
 
-**Pfad:** `docs/data/country_network.json`
-**Format:** JSON (für d3.js Visualisierung)
-**Größe:** 7.1 MB
-**Generierung:** Python-Skript `scripts/aggregation.py` (RDS → JSON)
+**Path:** `docs/data/country_network.json`
+**Format:** JSON (for d3.js visualization)
+**Size:** 7.1 MB
+**Generation:** Python script `scripts/aggregation.py` (RDS → JSON)
 
-### Struktur
+### Structure
 
-Das JSON enthält drei Hauptabschnitte:
+The JSON contains three main sections:
 
-**1. metadata** - Projektinformationen
+**1. metadata** - Project information
 ```json
 {
   "years": [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
@@ -91,7 +91,7 @@ Das JSON enthält drei Hauptabschnitte:
 }
 ```
 
-**2. cumulative** - Aggregiertes Netzwerk über alle Jahre
+**2. cumulative** - Aggregated network across all years
 ```json
 {
   "nodes": [
@@ -123,63 +123,63 @@ Das JSON enthält drei Hauptabschnitte:
 }
 ```
 
-**3. temporal** - Jährliche Snapshots (9 Jahre)
+**3. temporal** - Annual snapshots (9 years)
 ```json
 {
-  "2010": { /* gleiche Struktur wie cumulative */ },
+  "2010": { /* same structure as cumulative */ },
   "2011": { /* ... */ },
   ...
   "2018": { /* ... */ }
 }
 ```
 
-### Netzwerk-Metriken (Node-Ebene)
+### Network Metrics (Node Level)
 
-| Metrik | Beschreibung | Bereich | Interpretation |
-|--------|--------------|---------|----------------|
-| `degree_centrality` | Normalisierte Anzahl direkter Verbindungen | [0, 1] | Wie viele Länder kooperieren direkt? |
-| `betweenness_centrality` | Anteil kürzester Pfade durch den Knoten | [0, 1] | Brückenposition zwischen Clustern |
-| `closeness_centrality` | Durchschnittliche Distanz zu allen Knoten | [0, 1] | Wie schnell erreicht man andere Länder? |
-| `eigenvector_centrality` | Zentralität der Nachbarn | [0, 1] | Verbindungen zu wichtigen Ländern |
-| `weighted_degree` | Summe der Edge-Gewichte | Integer | Gesamte Kollaborationsintensität |
-| `community` | Community-ID (Louvain) | Integer | Cluster-Zugehörigkeit (bei low modularity bedeutungslos) |
+| Metric | Description | Range | Interpretation |
+|--------|-------------|-------|----------------|
+| `degree_centrality` | Normalized number of direct connections | [0, 1] | How many countries cooperate directly? |
+| `betweenness_centrality` | Proportion of shortest paths through node | [0, 1] | Bridge position between clusters |
+| `closeness_centrality` | Average distance to all nodes | [0, 1] | How fast to reach other countries? |
+| `eigenvector_centrality` | Centrality of neighbors | [0, 1] | Connections to important countries |
+| `weighted_degree` | Sum of edge weights | Integer | Total collaboration intensity |
+| `community` | Community ID (Louvain) | Integer | Cluster membership (meaningless at low modularity) |
 
-### Globale Metriken (Graph-Ebene)
+### Global Metrics (Graph Level)
 
-| Metrik | Beschreibung | Wert (Cumulative) | Interpretation |
-|--------|--------------|-------------------|----------------|
-| `density` | Anteil realisierter Kanten | 0.959 | Fast vollständig vernetzt (unrealistisch) |
-| `modularity` | Community-Qualität | 0.010 | Keine signifikanten Communities |
-| `num_communities` | Anzahl Communities (Louvain) | 3 | Statistisch bedeutungslos bei modularity 0.010 |
-| `avg_clustering` | Durchschnittlicher Clustering-Koeffizient | 0.961 | Hohe lokale Dichte |
+| Metric | Description | Value (Cumulative) | Interpretation |
+|--------|-------------|---------------------|----------------|
+| `density` | Proportion of realized edges | 0.959 | Almost fully connected (unrealistic) |
+| `modularity` | Community quality | 0.010 | No significant communities |
+| `num_communities` | Number of communities (Louvain) | 3 | Statistically meaningless at modularity 0.010 |
+| `avg_clustering` | Average clustering coefficient | 0.961 | High local density |
 
 ### Data Quality Warnings
 
-**Synthetische Daten:** Die JSON-Daten basieren auf `db_networkCoPat_fake.rds` und sind nicht repräsentativ für echte Patentnetzwerke.
+**Synthetic Data:** The JSON data is based on `db_networkCoPat_fake.rds` and is not representative of real patent networks.
 
-**Artefakte:**
-- Density 95.9%: Unrealistisch hoch (echte Netzwerke haben Density <10%)
-- Modularity 0.010: Keine erkennbaren Communities (statistically insignificant)
-- Community-basierte Farbkodierung: In Frontend durch Region-basierte Farben ersetzt
+**Artifacts:**
+- Density 95.9%: Unrealistically high (real networks have density <10%)
+- Modularity 0.010: No recognizable communities (statistically insignificant)
+- Community-based color coding: Replaced by region-based colors in frontend
 
-## Offene Fragen
+## Open Questions
 
-**Datenmodell und Semantik**
-- Was definiert eine Kooperation? Co-Anmeldung, Co-Ownership, Zitation, Technologietransfer?
-- Ist year_application das Anmelde- oder Erteilungsjahr?
+**Data Model and Semantics**
+- What defines a cooperation? Co-application, co-ownership, citation, technology transfer?
+- Is year_application the application or grant year?
 
-**Owner-IDs**
-- Woher stammt die ID-Systematik? Die Präfixe (QA, AT, SG) scheinen auf Länder hinzudeuten, aber country_1/country_2 existieren separat.
-- Sind die IDs persistent über Jahre oder können Firmen mehrere IDs haben?
+**Owner IDs**
+- Where does the ID system come from? The prefixes (QA, AT, SG) seem to indicate countries, but country_1/country_2 exist separately.
+- Are the IDs persistent across years or can firms have multiple IDs?
 
-**Datenherkunft**
-- Welche Originaldatenquelle liegt zugrunde (EPO, USPTO, PATSTAT)?
-- Welche Vorverarbeitung wurde bereits durchgeführt?
+**Data Origin**
+- What original data source is the basis (EPO, USPTO, PATSTAT)?
+- What preprocessing has already been performed?
 
-**Synthetischer Datensatz**
-- Wie wurde db_networkCoPat_fake.rds aus den Originaldaten erzeugt? Anonymisierung, Shuffling, vollständig generiert?
-- Sind die statistischen Eigenschaften (Verteilungen, Netzwerkstruktur) repräsentativ für die echten Daten?
+**Synthetic Dataset**
+- How was db_networkCoPat_fake.rds generated from the original data? Anonymization, shuffling, fully generated?
+- Are the statistical properties (distributions, network structure) representative of real data?
 
 **Aggregation**
-- Ist weight bereits pro Firmenpaar und Jahr aggregiert, oder können Duplikate existieren?
-- Wie wurde bei der Aggregation auf Länderebene mit Firmen umgegangen, die in mehreren Ländern aktiv sind?
+- Is weight already aggregated per firm pair and year, or can duplicates exist?
+- How were firms active in multiple countries handled in country-level aggregation?

@@ -1,33 +1,33 @@
-# Review Matrix: Daten & Forschungsfragen
+# Review Matrix: Data & Research Questions
 
-**Generiert am:** 2026-01-12T18:28:56.282521
+**Generated on:** 2026-01-12T18:28:56.282521
 
 ---
 
-## Abschnitt 1: Daten-Konsistenz
+## Section 1: Data Consistency
 
-| Check                                    | Original (international)   | Aggregiert                 | Status        | Diskrepanz                            | Original            |
+| Check                                    | Original (international)   | Aggregated                 | Status        | Discrepancy                           | Original            |
 |:-----------------------------------------|:---------------------------|:---------------------------|:--------------|:--------------------------------------|:--------------------|
-| 1.1 Weight-Erhaltung (international)     | 535,054                    | 535,054                    | ✓ Korrekt     | 0.0                                   | nan                 |
-| 1.2 Länder-Abdeckung                     | nan                        | 110 Länder                 | ✓ Komplett    | Keine                                 | 110 Länder          |
-| 1.3 Zeitraum-Abdeckung                   | nan                        | 2010-2018 (9 Jahre)        | ✓ Vollständig | Keine                                 | 2010-2018 (9 Jahre) |
-| 1.4 Nationale Kooperationen (exkludiert) | nan                        | 0 (0%, korrekt exkludiert) | ✓ Korrekt     | 99.2% internationale Koop. inkludiert | 1,167 (0.85%)       |
+| 1.1 Weight Preservation (international)  | 535,054                    | 535,054                    | ✓ Correct     | 0.0                                   | nan                 |
+| 1.2 Country Coverage                     | nan                        | 110 countries              | ✓ Complete    | None                                  | 110 countries       |
+| 1.3 Time Period Coverage                 | nan                        | 2010-2018 (9 years)        | ✓ Complete    | None                                  | 2010-2018 (9 years) |
+| 1.4 National Cooperations (excluded)     | nan                        | 0 (0%, correctly excluded) | ✓ Correct     | 99.2% international coop. included    | 1,167 (0.85%)       |
 
-## Abschnitt 2: Forschungsfragen-Alignment
+## Section 2: Research Question Alignment
 
-### Forschungsfrage 1: Makro-Zentralität
+### Research Question 1: Macro Centrality
 
-| Metrik                 | Verfügbar   | Wertebereich   | Normalisiert     |
+| Metric                 | Available   | Value Range    | Normalized       |
 |:-----------------------|:------------|:---------------|:-----------------|
-| degree_centrality      | ✓           | [0.844, 1.000] | ✓ Ja             |
-| betweenness_centrality | ✓           | [0.000, 0.029] | ✓ Ja             |
-| closeness_centrality   | ✓           | [0.013, 0.017] | ✓ Ja             |
-| eigenvector_centrality | ✓           | [0.051, 0.113] | ✓ Ja             |
+| degree_centrality      | ✓           | [0.844, 1.000] | ✓ Yes            |
+| betweenness_centrality | ✓           | [0.000, 0.029] | ✓ Yes            |
+| closeness_centrality   | ✓           | [0.013, 0.017] | ✓ Yes            |
+| eigenvector_centrality | ✓           | [0.051, 0.113] | ✓ Yes            |
 | Communities (Louvain)  | ✓           | 5 Communities  | Modularity=0.010 |
 
-### Forschungsfrage 3: Temporale Entwicklung
+### Research Question 3: Temporal Evolution
 
-|   Jahr |   Nodes |   Edges |   Density |   Communities |   Modularity |
+|   Year |   Nodes |   Edges |   Density |   Communities |   Modularity |
 |-------:|--------:|--------:|----------:|--------------:|-------------:|
 |   2010 |     110 |    5147 |     0.859 |             5 |        0.046 |
 |   2011 |     110 |    5192 |     0.866 |             6 |        0.049 |
@@ -39,37 +39,37 @@
 |   2017 |     110 |    5133 |     0.856 |             6 |        0.05  |
 |   2018 |     110 |    5185 |     0.865 |             6 |        0.045 |
 
-## Abschnitt 3: Methodische Korrektheit
+## Section 3: Methodological Correctness
 
-| Check                                | Wert                  | Sollwert                     | Status      |
+| Check                                | Value                 | Expected Value               | Status      |
 |:-------------------------------------|:----------------------|:-----------------------------|:------------|
-| 3.1 Self-Loops (nationale Koop.)     | 0 Self-Loops          | 0 (keine)                    | ✓ Korrekt   |
-| 3.2 Degree Centrality Normalisierung | Max=1.000000          | ≤ 1.0                        | ✓ Korrekt   |
-| 3.3 Network Connectivity             | Connected             | Connected (erwartet)         | ✓ Korrekt   |
-| 3.4 Weight-Verteilung                | Median=90, Mean=93.0  | Rechtsschief (Median < Mean) | ✓ Plausibel |
-| 3.5 Modularity (bei hoher Density)   | Mod=0.010, Dens=0.959 | Mod < 0.3 bei Dens > 0.8     | ✓ Plausibel |
+| 3.1 Self-Loops (national coop.)      | 0 Self-Loops          | 0 (none)                     | ✓ Correct   |
+| 3.2 Degree Centrality Normalization  | Max=1.000000          | ≤ 1.0                        | ✓ Correct   |
+| 3.3 Network Connectivity             | Connected             | Connected (expected)         | ✓ Correct   |
+| 3.4 Weight Distribution              | Median=90, Mean=93.0  | Right-skewed (Median < Mean) | ✓ Plausible |
+| 3.5 Modularity (at high density)     | Mod=0.010, Dens=0.959 | Mod < 0.3 at Dens > 0.8      | ✓ Plausible |
 
-## Abschnitt 4: User Stories
+## Section 4: User Stories
 
-| US    | Titel                         | Status                   | Evidenz                                       |
-|:------|:------------------------------|:-------------------------|:----------------------------------------------|
-| US-01 | Daten laden & validieren      | ✓ Abgeschlossen          | explore_rds.py, verify_data.py                |
-| US-02 | Aggregation Länderebene       | ✓ Abgeschlossen          | aggregate_country_network.py, JSON 5751 edges |
-| US-03 | Netzwerkobjekte (Länder)      | ✓ Abgeschlossen          | 9 Jahre + kumulativ in JSON                   |
-| US-04 | Netzwerkobjekte (Firmen)      | ⚠ Offen                  | CSV-Exploration vorhanden, Netzwerk offen     |
-| US-05 | Zentralitätsmaße              | ✓ Abgeschlossen (Länder) | 4 Centrality-Metriken in JSON                 |
-| US-06 | Community Detection           | ✓ Abgeschlossen          | Louvain, Modularity in JSON                   |
-| US-07 | Globale Netzwerkeigenschaften | ✓ Abgeschlossen          | 9 Metriken (inkl. Path Length, Assortativity) |
-| US-08 | Statische Visualisierung      | ⏸ Offen                  | design.md vorhanden, Implementation offen     |
-| US-09 | Temporale Visualisierung      | ⏸ Offen                  | design.md vorhanden, Implementation offen     |
+| US    | Title                         | Status               | Evidence                                      |
+|:------|:------------------------------|:---------------------|:----------------------------------------------|
+| US-01 | Load & validate data          | ✓ Completed          | explore_rds.py, verify_data.py                |
+| US-02 | Country-level aggregation     | ✓ Completed          | aggregate_country_network.py, JSON 5751 edges |
+| US-03 | Network objects (countries)   | ✓ Completed          | 9 years + cumulative in JSON                  |
+| US-04 | Network objects (firms)       | ⚠ Open               | CSV exploration available, network open       |
+| US-05 | Centrality measures           | ✓ Completed (countries) | 4 Centrality metrics in JSON                  |
+| US-06 | Community detection           | ✓ Completed          | Louvain, Modularity in JSON                   |
+| US-07 | Global network properties     | ✓ Completed          | 9 metrics (incl. Path Length, Assortativity)  |
+| US-08 | Static visualization          | ⏸ Open               | design.md available, implementation open      |
+| US-09 | Temporal visualization        | ⏸ Open               | design.md available, implementation open      |
 
 ---
 
-## Gesamtbewertung
+## Overall Assessment
 
-✓✓✓ **DATEN SIND ABSOLUT KORREKT UND BEREIT FÜR FRONTEND**
+✓✓✓ **DATA IS ABSOLUTELY CORRECT AND READY FOR FRONTEND**
 
-- Daten-Qualität: EXZELLENT
-- Forschungsfragen-Alignment: SEHR GUT (2/3 vollständig)
-- Methodische Korrektheit: EXZELLENT
-- Vollständigkeit: GUT (6/9 User Stories)
+- Data Quality: EXCELLENT
+- Research Question Alignment: VERY GOOD (2/3 complete)
+- Methodological Correctness: EXCELLENT
+- Completeness: GOOD (6/9 User Stories)

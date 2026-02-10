@@ -1,26 +1,26 @@
 # design.md
 
-## Übersicht
+## Overview
 
-Forschungsgetriebene Entwicklung der Visualisierungen für das Patent-Kooperationsnetzwerk. Visualisierungen dienen der Beantwortung spezifischer Forschungsfragen, nicht ästhetischen Präferenzen.
+Research-driven development of visualizations for the patent cooperation network. Visualizations serve to answer specific research questions, not aesthetic preferences.
 
 **Status:** Draft – Design Sprint Phase 1 (Task Analysis)
 
-## Design-Prinzipien
+## Design Principles
 
-| Prinzip | Grundlage | Implikation |
-|---------|-----------|-------------|
-| Research-Driven | Forschungsfragen aus research.md | Jede Visualisierung adressiert explizit eine Forschungsfrage |
-| Task-Oriented | Brehmer & Munzner 2013 | Why → What → How Dekomposition |
+| Principle | Foundation | Implication |
+|-----------|------------|-------------|
+| Research-Driven | Research questions from research.md | Every visualization explicitly addresses a research question |
+| Task-Oriented | Brehmer & Munzner 2013 | Why → What → How decomposition |
 | Perception-Based | Cleveland & McGill 1984 | Position > Length > Area > Color |
 | Scalable | Munzner Framework | Pre-calculated metrics, Progressive Disclosure, Filtering |
-| Consistent | Cross-View Coherence | Knotengröße = Weighted Degree, Farbe = Community, durchgängig |
+| Consistent | Cross-View Coherence | Node size = Weighted Degree, Color = Community, throughout |
 
-## Task-Analyse
+## Task Analysis
 
-### Forschungsfrage 1: Makro-Zentralität & Communities
+### Research Question 1: Macro Centrality & Communities
 
-> Welche Länder sind zentrale Akteure? Lassen sich regionale Kooperationscluster identifizieren?
+> Which countries are central actors? Can regional cooperation clusters be identified?
 
 | Why | What | How |
 |-----|------|-----|
@@ -30,9 +30,9 @@ Forschungsgetriebene Entwicklung der Visualisierungen für das Patent-Kooperatio
 
 → **VIS-1A** (Network Overview) + **VIS-1B** (Centrality Ranking)
 
-### Forschungsfrage 2: Bridge-Firmen (Mikroebene)
+### Research Question 2: Bridge Firms (Micro Level)
 
-> Welche Firmen fungieren als Brücken zwischen Ländern? Multinationale vs. Nischenfirmen?
+> Which firms act as bridges between countries? Multinational vs. niche firms?
 
 | Why | What | How |
 |-----|------|-----|
@@ -42,11 +42,11 @@ Forschungsgetriebene Entwicklung der Visualisierungen für das Patent-Kooperatio
 
 → **VIS-2A** (Bridge Firm Ranking) + **VIS-2B** (Firm-Country Bipartite)
 
-**Status:** ⚠️ Wartet auf US-04 (Firm-Level Data Preparation)
+**Status:** ⚠️ Waiting for US-04 (Firm-Level Data Preparation)
 
-### Forschungsfrage 3: Temporale Entwicklung
+### Research Question 3: Temporal Evolution
 
-> Wie hat sich die Netzwerkstruktur 2010–2018 verändert? Welche Länder haben Zentralität gewonnen/verloren?
+> How has the network structure changed 2010–2018? Which countries have gained/lost centrality?
 
 | Why | What | How |
 |-----|------|-----|
@@ -56,19 +56,19 @@ Forschungsgetriebene Entwicklung der Visualisierungen für das Patent-Kooperatio
 
 → **VIS-3A** (Global Metrics Timeline) + **VIS-3B** (Country Centrality Trends) + **VIS-3C** (Animated Network)
 
-## Design-Entscheidung
+## Design Decision
 
-| Alternative | Beschreibung | Bewertung |
-|-------------|--------------|-----------|
-| All-in-One Dashboard | Eine große kombinierte Visualisierung | ❌ Cognitive Overload, nicht skalierbar |
-| Tab-Based Navigation | Drei separate Tabs für drei Forschungsfragen | ⚠️ Keine Cross-View-Vergleiche |
-| **Multiple Coordinated Views** | Hauptviews koordiniert, Brushing/Linking | ✅ Empfohlen |
+| Alternative | Description | Evaluation |
+|-------------|-------------|------------|
+| All-in-One Dashboard | One large combined visualization | ❌ Cognitive Overload, not scalable |
+| Tab-Based Navigation | Three separate tabs for three research questions | ⚠️ No cross-view comparisons |
+| **Multiple Coordinated Views** | Main views coordinated, Brushing/Linking | ✅ Recommended |
 
-## Layout-Struktur
+## Layout Structure
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Header: Titel, Jahr-Selector, Legende                           │
+│ Header: Title, Year Selector, Legend                            │
 ├──────────────────────────────────────┬──────────────────────────┤
 │                                      │ VIS-1B: Centrality       │
 │     VIS-1A: Network Overview         │ Ranking (Top-20)         │
@@ -78,28 +78,28 @@ Forschungsgetriebene Entwicklung der Visualisierungen für das Patent-Kooperatio
 ├──────────────────────────────────────┴──────────────────────────┤
 │ Time Slider: [2010 ────●─────── 2018]  [Play] [Reset]          │
 └─────────────────────────────────────────────────────────────────┘
-Modal (on-demand): VIS-2A + VIS-2B (Bridge-Firmen)
+Modal (on-demand): VIS-2A + VIS-2B (Bridge Firms)
 ```
 
 **Responsive Breakpoints:**
-- Desktop (>1200px): Layout wie oben
-- Tablet (768–1200px): Side Panels stacken vertikal
-- Mobile (<768px): Tab-based Fallback, nur statische Charts
+- Desktop (>1200px): Layout as above
+- Tablet (768–1200px): Side panels stack vertically
+- Mobile (<768px): Tab-based fallback, only static charts
 
 ## Visual Encodings
 
 ### VIS-1A: Network Overview
 
-| Channel | Variable | Scale | Begründung |
-|---------|----------|-------|------------|
+| Channel | Variable | Scale | Justification |
+|---------|----------|-------|---------------|
 | Node Position | Force-Directed | – | Reveals community structure |
-| Node Size | Weighted Degree | log(degree) → radius [5–30px] | Vermeidet Outlier-Dominanz |
-| Node Color | Community ID | d3.schemeCategory10 | Kategorisch, 5–7 Communities |
-| Node Label | Country ISO-2 | Text (on hover/zoom) | Reduziert Clutter |
-| Edge Width | Weight | sqrt(weight) → [0.5–5px] | Balanciert Extremwerte |
-| Edge Opacity | Weight | weight/max → [0.2–0.8] | Verstärkt Importance |
+| Node Size | Weighted Degree | log(degree) → radius [5–30px] | Avoids outlier dominance |
+| Node Color | Community ID | d3.schemeCategory10 | Categorical, 5–7 Communities |
+| Node Label | Country ISO-2 | Text (on hover/zoom) | Reduces clutter |
+| Edge Width | Weight | sqrt(weight) → [0.5–5px] | Balances extreme values |
+| Edge Opacity | Weight | weight/max → [0.2–0.8] | Reinforces importance |
 
-**Force-Directed Parameter:** link distance 50, charge strength -200, collision radius = nodeScale + 2
+**Force-Directed Parameters:** link distance 50, charge strength -200, collision radius = nodeScale + 2
 
 ### VIS-1B: Centrality Ranking
 
@@ -107,9 +107,9 @@ Modal (on-demand): VIS-2A + VIS-2B (Bridge-Firmen)
 |---------|----------|-------|
 | Bar Position X | Degree Centrality | Linear [0, max] |
 | Bar Position Y | Country (sorted) | Ordinal by centrality |
-| Bar Color | Community ID | Wie VIS-1A |
+| Bar Color | Community ID | As VIS-1A |
 
-Default: Top-20, Dropdown für Top-N [10/20/50/All]
+Default: Top-20, Dropdown for Top-N [10/20/50/All]
 
 ### VIS-3A: Temporal Metrics
 
@@ -117,10 +117,10 @@ Default: Top-20, Dropdown für Top-N [10/20/50/All]
 |---------|----------|-------|
 | Line Position X | Year | Linear [2010–2018] |
 | Line Position Y | Metric Value | Linear (per metric) |
-| Line Color | Metric Type | Qualitative (4 Farben) |
+| Line Color | Metric Type | Qualitative (4 colors) |
 
-**Metriken:** Density, Modularity, Num Communities, Avg Clustering
-**Layout:** Small Multiples (4 Mini-Charts) bevorzugt gegenüber Dual-Axis
+**Metrics:** Density, Modularity, Num Communities, Avg Clustering
+**Layout:** Small Multiples (4 mini-charts) preferred over dual-axis
 
 ### VIS-3B: Country Centrality Trends (Slopegraph)
 
@@ -131,15 +131,15 @@ Default: Top-20, Dropdown für Top-N [10/20/50/All]
 | Line Color | Country |
 | Line Thickness | abs(Rank Change) |
 
-## Interaktionsdesign
+## Interaction Design
 
-Folgt Shneiderman's Mantra: Overview First → Zoom and Filter → Details on Demand
+Follows Shneiderman's Mantra: Overview First → Zoom and Filter → Details on Demand
 
 ### Overview First (Initial State)
 
 - VIS-1A: Full network, cumulative view (2010–2018)
 - VIS-1B: Top-20 countries by cumulative centrality
-- VIS-3A: Alle Metriken, alle Jahre
+- VIS-3A: All metrics, all years
 - Title: "Patent Cooperation Network (2010–2018) – 110 Countries, 5,829 Cooperations"
 
 ### Zoom and Filter
@@ -147,9 +147,9 @@ Folgt Shneiderman's Mantra: Overview First → Zoom and Filter → Details on De
 | Control | Affects | Default |
 |---------|---------|---------|
 | Time Slider (2010–2018 + Cumulative) | VIS-1A, VIS-1B, VIS-3A | Cumulative |
-| Edge Weight Slider [1–14] | VIS-1A | 1 (alle Edges) |
+| Edge Weight Slider [1–14] | VIS-1A | 1 (all edges) |
 | Top-N Dropdown [10/20/50/All] | VIS-1B | 20 |
-| Play Button | Animiert durch Jahre (500ms/Jahr) | – |
+| Play Button | Animates through years (500ms/year) | – |
 
 ### Details on Demand
 
@@ -164,45 +164,45 @@ Folgt Shneiderman's Mantra: Overview First → Zoom and Filter → Details on De
 **Click:** Highlight Ego-Network (1-hop neighbors), Dim rest (opacity 0.2), Scroll linked views
 **Double-Click:** Reset all filters and highlights
 
-## Technologie-Stack
+## Technology Stack
 
-| Komponente | Technologie |
-|------------|-------------|
-| Visualisierung | d3.js v7 |
+| Component | Technology |
+|-----------|------------|
+| Visualization | d3.js v7 |
 | Layout | CSS Grid + Flexbox |
 | Tooltips | d3-tip |
-| Datenformat | JSON (pre-calculated, 7.1 MB) |
+| Data Format | JSON (pre-calculated, 7.1 MB) |
 
-**Performance-Ziele:** Initial Load <2s, Force Simulation <3s, Animation 60fps, Tooltip <16ms
+**Performance Goals:** Initial Load <2s, Force Simulation <3s, Animation 60fps, Tooltip <16ms
 
-## Offene Fragen
+## Open Questions
 
-| Frage | Status | Empfehlung |
-|-------|--------|------------|
-| Bridge-Firmen Data (VIS-2) | ✅ Gelöst | VIS-4 mit Länderebene-Proxy implementiert (Betweenness Centrality) |
-| Color Palette bei >10 Communities | ✅ Gelöst | Region-basierte Farbpalette (7 Regionen) ersetzt Community-Colors |
-| Animation vs. Small Multiples (VIS-3C) | ✅ Gelöst | Small Multiples (VIS-3A) + Slopegraph (VIS-3B) implementiert |
-| Responsive Breakpoints | Desktop-first | Mobile zeigt nur VIS-1B + VIS-3A |
-| Accessibility | Phase 1 ohne | Später ColorBrewer-Palettes |
-| Export-Funktionen | Nice-to-have | SVG-Export für VIS-1A |
-| Publikations-Qualität (300 DPI) | Später | Web-first, Print später |
+| Question | Status | Recommendation |
+|----------|--------|----------------|
+| Bridge Firms Data (VIS-2) | ✅ Resolved | VIS-4 implemented with country-level proxy (Betweenness Centrality) |
+| Color Palette for >10 Communities | ✅ Resolved | Region-based color palette (7 regions) replaces Community Colors |
+| Animation vs. Small Multiples (VIS-3C) | ✅ Resolved | Small Multiples (VIS-3A) + Slopegraph (VIS-3B) implemented |
+| Responsive Breakpoints | Desktop-first | Mobile shows only VIS-1B + VIS-3A |
+| Accessibility | Phase 1 without | Later ColorBrewer palettes |
+| Export Functions | Nice-to-have | SVG export for VIS-1A |
+| Publication Quality (300 DPI) | Later | Web-first, print later |
 
-## Nächste Schritte
+## Next Steps
 
-1. **Phase 1:** HTML-Skeleton mit Grid-Layout, JSON laden
+1. **Phase 1:** HTML skeleton with grid layout, load JSON
 2. **Phase 2:** VIS-1A (Force-Directed, Tooltips, Click-Highlighting)
-3. **Phase 3:** VIS-1B + VIS-3A, Koordination zwischen Views
+3. **Phase 3:** VIS-1B + VIS-3A, coordination between views
 4. **Phase 4:** Time Slider, Play/Pause, Filtering
-5. **Phase 5:** VIS-2 (nach US-04)
+5. **Phase 5:** VIS-2 (after US-04)
 6. **Phase 6:** Responsive Design, Export, Performance, A11y
 
 ## Design Validation
 
-| Kriterium | Check |
+| Criterion | Check |
 |-----------|-------|
-| Research-Driven | ✅ Alle 3 Forschungsfragen adressiert |
-| Task-Oriented | ✅ Brehmer & Munzner Tabellen dokumentiert |
+| Research-Driven | ✅ All 3 research questions addressed |
+| Task-Oriented | ✅ Brehmer & Munzner tables documented |
 | Perception-Based | ✅ Position > Length > Color |
 | Scalable | ✅ 110 Nodes + Filtering |
-| Consistent | ✅ Color = Community, Size = Degree durchgängig |
-| Shneiderman's Mantra | ✅ Overview → Filter → Details implementiert |
+| Consistent | ✅ Color = Community, Size = Degree throughout |
+| Shneiderman's Mantra | ✅ Overview → Filter → Details implemented |

@@ -1,6 +1,6 @@
 # Patent Co-Ownership Network Analysis
 
-Netzwerkanalyse internationaler Patentkooperationen zwischen Firmen (2010-2018).
+Network analysis of international patent collaborations between firms (2010-2018).
 
 ## Quick Start
 
@@ -8,84 +8,84 @@ Netzwerkanalyse internationaler Patentkooperationen zwischen Firmen (2010-2018).
 # Installation
 pip install pyreadr pandas networkx
 
-# Daten explorieren
+# Explore data
 python scripts/explore_rds.py
 
-# Datenqualität verifizieren
+# Verify data quality
 python scripts/verify_data.py
 ```
 
-## Projektstruktur
+## Project Structure
 
 ```
-data/         RDS-Daten (lokal, .gitignore, synthetischer Datensatz für Entwicklung)
-scripts/      Python-Analyseskripte
-knowledge/    Promptotyping-Dokumentation
-docs/         GitHub Pages Output (Visualisierungen, Metriken, HTML)
+data/         RDS data (local, .gitignore, synthetic dataset for development)
+scripts/      Python analysis scripts
+knowledge/    Promptotyping documentation
+docs/         GitHub Pages output (visualizations, metrics, HTML)
 ```
 
-**Workflow:** Lokale Python-Verarbeitung (`data/` → `scripts/` → `docs/`) → GitHub Pages Publikation
+**Workflow:** Local Python processing (`data/` → `scripts/` → `docs/`) → GitHub Pages publication
 
-## Daten
+## Data
 
-**Datensatz:** `data/db_networkCoPat_fake.rds`
-- 137,990 Patentkooperationen
-- ~134,000 eindeutige Firmen
-- 96 Länder
-- Zeitraum: 2010-2018
-- Ungerichtetes, gewichtetes Netzwerk
+**Dataset:** `data/db_networkCoPat_fake.rds`
+- 137,990 patent collaborations
+- ~134,000 unique firms
+- 96 countries
+- Time period: 2010-2018
+- Undirected, weighted network
 
 Details: [knowledge/data.md](knowledge/data.md)
 
-## Forschungsfragen
+## Research Questions
 
-**Makroebene:** Welche Länder sind zentrale Akteure? Gibt es regionale Cluster?
+**Macro level:** Which countries are central actors? Are there regional clusters?
 
-**Mikroebene:** Welche Firmen fungieren als Brücken zwischen Ländern?
+**Micro level:** Which firms act as bridges between countries?
 
-**Temporal:** Wie verändert sich die Netzwerkstruktur über Zeit?
+**Temporal:** How does the network structure change over time?
 
 Details: [knowledge/research.md](knowledge/research.md)
 
-## Methodik
+## Methodology
 
-Dieses Projekt folgt der **Promptotyping-Methode** für LLM-gestützte Forschung.
+This project follows the **Promptotyping method** for LLM-assisted research.
 
-Kernprinzip: Dokumentation ist die Quelle der Wahrheit, Code ist ein wiederverwendbares Artefakt.
+Core principle: Documentation is the source of truth, code is a reusable artifact.
 
 Details: [knowledge/CLAUDE.md](knowledge/CLAUDE.md)
 
-## Dokumentation
+## Documentation
 
-| Dokument | Inhalt |
-|----------|--------|
-| [knowledge/data.md](knowledge/data.md) | Datenstruktur, Variablen, Qualität |
-| [knowledge/research.md](knowledge/research.md) | Forschungsfragen, Metriken, Python-Tooling |
-| [knowledge/requirements.md](knowledge/requirements.md) | User Stories, Akzeptanzkriterien, Tech Stack |
-| [knowledge/journal.md](knowledge/journal.md) | Entwicklungsprozess, Entscheidungen, Learnings |
-| [scripts/README.md](scripts/README.md) | Skript-Dokumentation |
+| Document | Content |
+|----------|---------|
+| [knowledge/data.md](knowledge/data.md) | Data structure, variables, quality |
+| [knowledge/research.md](knowledge/research.md) | Research questions, metrics, Python tooling |
+| [knowledge/requirements.md](knowledge/requirements.md) | User stories, acceptance criteria, tech stack |
+| [knowledge/journal.md](knowledge/journal.md) | Development process, decisions, learnings |
+| [scripts/README.md](scripts/README.md) | Script documentation |
 
 ## Workflow
 
-1. **Vorbereitung:** Lies `knowledge/` Dokumente
-2. **Implementierung:** Entwickle Skripte basierend auf Dokumentation
-3. **Validierung:** Verifiziere Ergebnisse
-4. **Dokumentation:** Aktualisiere `journal.md` mit neuen Erkenntnissen
+1. **Preparation:** Read `knowledge/` documents
+2. **Implementation:** Develop scripts based on documentation
+3. **Validation:** Verify results
+4. **Documentation:** Update `journal.md` with new insights
 
-## Technologie-Stack
+## Technology Stack
 
 **Python 3.11+**
 
-**Datenverarbeitung:** pandas, pyreadr
+**Data processing:** pandas, pyreadr
 
-**Netzwerkanalyse:** NetworkX (Standard), igraph (optional für >100k Knoten)
+**Network analysis:** NetworkX (standard), igraph (optional for >100k nodes)
 
-**Community Detection:** python-louvain, leidenalg (optional)
+**Community detection:** python-louvain, leidenalg (optional)
 
-**Visualisierung:** Matplotlib, Plotly, PyVis
+**Visualization:** Matplotlib, Plotly, PyVis
 
-**Publikation:** GitHub Pages (statische HTML, interaktive Plots)
+**Publication:** GitHub Pages (static HTML, interactive plots)
 
-## Hinweise
+## Notes
 
-Dies ist ein **synthetischer Datensatz**.
+This is a **synthetic dataset**.

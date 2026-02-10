@@ -1,209 +1,209 @@
 # requirements.md
 
-## Übersicht
+## Overview
 
-Dieses Dokument definiert die Anforderungen für die Netzwerkanalyse der Patentkooperationsdaten. User Stories sind nach Priorität geordnet. Jede Story enthält Akzeptanzkriterien und Status.
+This document defines the requirements for the network analysis of patent cooperation data. User stories are ordered by priority. Each story contains acceptance criteria and status.
 
-## Technologie-Stack
+## Technology Stack
 
-**Programmiersprache:** Python 3.11+
+**Programming Language:** Python 3.11+
 
-**Kernbibliotheken:**
-- pandas, pyreadr (Datenverarbeitung)
-- networkx (Netzwerkanalyse, Standard)
-- python-louvain / leidenalg (Community Detection)
-- matplotlib, plotly, pyvis (Visualisierung)
+**Core Libraries:**
+- pandas, pyreadr (data processing)
+- networkx (network analysis, standard)
+- python-louvain / leidenalg (community detection)
+- matplotlib, plotly, pyvis (visualization)
 
-**Optional für Performance:**
-- igraph (Python-Binding) bei >100k Knoten
-- graph-tool (maximale Performance, komplexere Installation)
+**Optional for Performance:**
+- igraph (Python binding) for >100k nodes
+- graph-tool (maximum performance, more complex installation)
 
 ## User Stories
 
-### Phase 1: Datenvorbereitung
+### Phase 1: Data Preparation
 
-**US-01: Daten laden und validieren**
-Als Forschender möchte ich die RDS-Datei laden und die Datenqualität prüfen, um sicherzustellen, dass die Daten für die Analyse geeignet sind.
+**US-01: Load and validate data**
+As a researcher, I want to load the RDS file and check data quality to ensure the data is suitable for analysis.
 
-Akzeptanzkriterien:
-- Daten sind in Python als pandas DataFrame verfügbar (via pyreadr)
-- Spaltentypen entsprechen der Spezifikation in data.md
-- Keine unerwarteten Nullwerte oder Duplikate
-- Explorative Zusammenfassung dokumentiert
+Acceptance Criteria:
+- Data is available in Python as pandas DataFrame (via pyreadr)
+- Column types match the specification in data.md
+- No unexpected null values or duplicates
+- Exploratory summary documented
 
-Status: Abgeschlossen (siehe scripts/explore_rds.py, scripts/verify_data.py)
-
----
-
-**US-02: Aggregation auf Länderebene**
-Als Forschender möchte ich die Firmendaten auf Länderebene aggregieren, um makroökonomische Kooperationsmuster analysieren zu können.
-
-Akzeptanzkriterien:
-- Neuer Datensatz mit country_1, country_2, year_application, weight (summiert)
-- Dokumentation der Aggregationslogik
-- Validierung: Summe der Gewichte bleibt erhalten
-
-Status: Abgeschlossen (siehe scripts/aggregate_country_network.py, docs/data/country_network.json)
+Status: Completed (see scripts/explore_rds.py, scripts/verify_data.py)
 
 ---
 
-### Phase 2: Netzwerkkonstruktion
+**US-02: Country-level aggregation**
+As a researcher, I want to aggregate firm data to country level to analyze macroeconomic cooperation patterns.
 
-**US-03: Netzwerkobjekte erstellen (Länderebene)**
-Als Forschender möchte ich aus den aggregierten Daten Netzwerkobjekte erstellen, um Netzwerkmetriken berechnen zu können.
+Acceptance Criteria:
+- New dataset with country_1, country_2, year_application, weight (summed)
+- Documentation of aggregation logic
+- Validation: Sum of weights is preserved
 
-Akzeptanzkriterien:
-- NetworkX Graph-Objekt pro Jahr und kumulativ
-- Ungerichtetes, gewichtetes Netzwerk
-- Knotenanzahl entspricht Anzahl der Länder (~96)
-- Kantengewichte entsprechen aggregierten weights
-
-Technologie: NetworkX (Standard), igraph optional für Vergleich
-
-Status: Abgeschlossen (siehe scripts/aggregate_country_network.py, 9 jährliche Graphs + 1 kumulativ)
+Status: Completed (see scripts/aggregate_country_network.py, docs/data/country_network.json)
 
 ---
 
-**US-04: Netzwerkobjekte erstellen (Firmenebene)**
-Als Forschender möchte ich aus den Originaldaten Netzwerkobjekte auf Firmenebene erstellen, um disaggregierte Analysen durchführen zu können.
+### Phase 2: Network Construction
 
-Akzeptanzkriterien:
-- NetworkX Graph-Objekt pro Jahr und kumulativ
-- Ungerichtetes, gewichtetes Netzwerk
-- Performant für ~134,000 Knoten (ggf. igraph verwenden)
-- Alternative: Subgraph-Analyse (Top-N Firmen nach Degree)
+**US-03: Create network objects (country level)**
+As a researcher, I want to create network objects from aggregated data to calculate network metrics.
 
-Technologie: NetworkX (wenn performant genug), sonst igraph
+Acceptance Criteria:
+- NetworkX Graph object per year and cumulative
+- Undirected, weighted network
+- Node count matches number of countries (~96)
+- Edge weights match aggregated weights
 
-Performance-Warnung: Bei ~134k Knoten kann NetworkX langsam werden. Benchmarking erforderlich.
+Technology: NetworkX (standard), igraph optional for comparison
 
-Status: Offen
-
----
-
-### Phase 3: Metriken
-
-**US-05: Zentralitätsmaße berechnen**
-Als Forschender möchte ich Zentralitätsmaße (Degree, Betweenness, Eigenvector, Closeness) berechnen, um zentrale Akteure im Netzwerk zu identifizieren.
-
-Akzeptanzkriterien:
-- Metriken für beide Ebenen (Länder und Firmen)
-- Gewichtete Varianten wo sinnvoll
-- Export als Tabelle (CSV)
-- Top-10-Ranking pro Metrik
-
-Status: Abgeschlossen (Länderebene: Alle Centrality-Metriken in JSON - Degree, Betweenness, Closeness, Eigenvector, gewichtet + normalisiert. Firmenebene offen, siehe US-04)
+Status: Completed (see scripts/aggregate_country_network.py, 9 annual graphs + 1 cumulative)
 
 ---
 
-**US-06: Community Detection**
-Als Forschender möchte ich Communities im Netzwerk identifizieren, um Kooperationscluster zu erkennen.
+**US-04: Create network objects (firm level)**
+As a researcher, I want to create network objects at firm level from original data to conduct disaggregated analyses.
 
-Akzeptanzkriterien:
-- Louvain (via python-louvain oder networkx.algorithms.community) angewendet
-- Optional: Leiden (via leidenalg) als Verbesserung
-- Modularitätswerte dokumentiert
-- Community-Zuordnung als Knotenattribut im DataFrame
-- Vergleich der Ergebnisse wenn mehrere Algorithmen verwendet
+Acceptance Criteria:
+- NetworkX Graph object per year and cumulative
+- Undirected, weighted network
+- Performant for ~134,000 nodes (consider using igraph)
+- Alternative: Subgraph analysis (top-N firms by degree)
 
-Technologie: python-louvain (primär), leidenalg (optional)
+Technology: NetworkX (if performant enough), otherwise igraph
 
-Status: Abgeschlossen (Louvain für Länderebene in JSON, Modularity dokumentiert, Leiden optional offen)
+Performance Warning: NetworkX can be slow with ~134k nodes. Benchmarking required.
 
----
-
-**US-07: Globale Netzwerkeigenschaften**
-Als Forschender möchte ich globale Eigenschaften (Density, Average Path Length, Clustering Coefficient, Assortativity) berechnen, um die Gesamtstruktur des Netzwerks zu charakterisieren.
-
-Akzeptanzkriterien:
-- Metriken pro Jahr berechnet
-- Zeitliche Entwicklung als Tabelle
-- Interpretation im Kontext von Patentkooperationen
-
-Status: Abgeschlossen (Alle Metriken in JSON: Density, Clustering, Transitivity, Konnektivität, Average Path Length, Assortativity - jährlich + kumulativ)
+Status: Open
 
 ---
 
-### Phase 4: Visualisierung
+### Phase 3: Metrics
 
-**US-08: Statische Netzwerkvisualisierung**
-Als Forschender möchte ich das Netzwerk visualisieren, um Strukturen und Muster visuell erkennbar zu machen.
+**US-05: Calculate centrality measures**
+As a researcher, I want to calculate centrality measures (degree, betweenness, eigenvector, closeness) to identify central actors in the network.
 
-Akzeptanzkriterien:
-- Ländernetzwerk als lesbare Grafik
-- Knotengröße kodiert Degree oder Patentzahl
-- Knotenfarbe kodiert Community oder Region
-- Kantendicke kodiert Gewicht
-- Export als PNG (300 DPI) und PDF (Vektor)
+Acceptance Criteria:
+- Metrics for both levels (countries and firms)
+- Weighted variants where appropriate
+- Export as table (CSV)
+- Top-10 ranking per metric
 
-Technologie: d3.js v7 (Force-Directed Layout), CSS Grid, Vanilla JavaScript
-
-Layout: d3.forceSimulation (Force-Directed) für 110 Länder
-
-Status: Abgeschlossen (docs/index.html, docs/app.js, docs/styles.css - Force-Directed Network + Country Ranking Bar Chart, Zoom/Pan, Tooltips, Ego-Network Highlighting)
+Status: Completed (Country level: All centrality metrics in JSON - Degree, Betweenness, Closeness, Eigenvector, weighted + normalized. Firm level open, see US-04)
 
 ---
 
-**US-09: Temporale Visualisierung**
-Als Forschender möchte ich die zeitliche Entwicklung des Netzwerks visualisieren, um Veränderungen zwischen 2010 und 2018 sichtbar zu machen.
+**US-06: Community detection**
+As a researcher, I want to identify communities in the network to recognize cooperation clusters.
 
-Akzeptanzkriterien:
-- Small Multiples (ein Panel pro Jahr) oder Animation
-- Konsistentes Layout über Jahre hinweg
-- Erkennbare Trends
-- Rank-Vergleiche zwischen Jahren (Slopegraph)
+Acceptance Criteria:
+- Louvain (via python-louvain or networkx.algorithms.community) applied
+- Optional: Leiden (via leidenalg) as improvement
+- Modularity values documented
+- Community assignment as node attribute in DataFrame
+- Comparison of results when multiple algorithms used
 
-Status: Abgeschlossen (3-Tab-Navigation: Netzwerk | Temporal | Bridge-Länder. Time Slider koordiniert Network + Ranking Views. Temporal Metrics als Small Multiples [2x2 Grid] mit 4 Metriken. VIS-3B Slopegraph für Rank Changes 2010→2018 mit 4 Centrality-Metriken, Top-N Selector [10/20/50], Tooltips mit ΔRank und Δ Centrality, verbesserte Y-Spacing. VIS-4 Bridge Analysis (Betweenness Centrality Bar Chart) implementiert. Region-basierte Farbkodierung ersetzt Community-Colors.)
+Technology: python-louvain (primary), leidenalg (optional)
 
----
-
-**US-10: Methodentransparenz & Dokumentation**
-Als Forschender möchte ich die Datenverarbeitungspipeline und Berechnungsmethoden einsehen können, um die Reproduzierbarkeit und Validität der Analysen nachvollziehen zu können.
-
-Akzeptanzkriterien:
-- Visueller Workflow der Datenverarbeitung (RDS → Python → JSON)
-- Definitionen aller Netzwerk-Metriken mit Formeln
-- Transparente Darstellung von Datenqualitätsproblemen (Synthetic Data Warnings)
-- Zugriff auf vollständige Projektdokumentation (data.md, research.md, requirements.md)
-- Collapsible Accordion für Markdown-Dokumente (Lazy Loading)
-
-Technologie: Vanilla JavaScript (fetch API), Basic Markdown→HTML Parser (Regex-basiert, keine Dependencies)
-
-Status: Abgeschlossen (Tab 4 "Daten & Methodik" mit 4 Sections: Data Pipeline Flowchart, Network Metrics Definitions [4 Centrality-Formeln], Data Quality Warnings [Density 95.9%, Modularity 0.010, Synthetic Data Notice], Documentation Embed [Accordion UI mit knowledge/*.md files]. Basic Markdown Parser unterstützt Headers, Bold, Italic, Code Blocks, Links, Listen.)
+Status: Completed (Louvain for country level in JSON, modularity documented, Leiden optional open)
 
 ---
 
-## Priorisierung
+**US-07: Global network properties**
+As a researcher, I want to calculate global properties (density, average path length, clustering coefficient, assortativity) to characterize the overall network structure.
 
-| Priorität | Stories | Begründung |
-|-----------|---------|------------|
-| Hoch | US-01, US-02, US-03 | Grundlage für alle weiteren Analysen |
-| Hoch | US-05, US-08 | Kernmetriken und Basisvisualisierung |
-| Mittel | US-06, US-07 | Vertiefende Analysen |
-| Mittel | US-09 | Temporale Dimension |
-| Niedriger | US-04 | Firmenebene ist rechenintensiv, Länderebene hat Priorität |
+Acceptance Criteria:
+- Metrics calculated per year
+- Temporal evolution as table
+- Interpretation in context of patent cooperations
 
-## Publikations-Workflow
+Status: Completed (All metrics in JSON: Density, Clustering, Transitivity, Connectivity, Average Path Length, Assortativity - yearly + cumulative)
 
-**Lokale Verarbeitung:**
-- Python-Skripte verarbeiten `data/db_networkCoPat_fake.rds` (lokal, nicht im Git)
-- Berechnete Metriken, Visualisierungen und Ergebnisse werden in `docs/` gespeichert
-- `docs/` enthält nur aggregierte Ergebnisse, keine Rohdaten
+---
+
+### Phase 4: Visualization
+
+**US-08: Static network visualization**
+As a researcher, I want to visualize the network to make structures and patterns visually recognizable.
+
+Acceptance Criteria:
+- Country network as readable graphic
+- Node size encodes degree or patent count
+- Node color encodes community or region
+- Edge thickness encodes weight
+- Export as PNG (300 DPI) and PDF (vector)
+
+Technology: d3.js v7 (Force-Directed Layout), CSS Grid, Vanilla JavaScript
+
+Layout: d3.forceSimulation (Force-Directed) for 110 countries
+
+Status: Completed (docs/index.html, docs/app.js, docs/styles.css - Force-Directed Network + Country Ranking Bar Chart, Zoom/Pan, Tooltips, Ego-Network Highlighting)
+
+---
+
+**US-09: Temporal visualization**
+As a researcher, I want to visualize the temporal evolution of the network to make changes between 2010 and 2018 visible.
+
+Acceptance Criteria:
+- Small multiples (one panel per year) or animation
+- Consistent layout across years
+- Recognizable trends
+- Rank comparisons between years (slopegraph)
+
+Status: Completed (3-tab navigation: Network | Temporal | Bridge Countries. Time Slider coordinates Network + Ranking Views. Temporal Metrics as Small Multiples [2x2 Grid] with 4 metrics. VIS-3B Slopegraph for Rank Changes 2010→2018 with 4 Centrality metrics, Top-N Selector [10/20/50], Tooltips with ΔRank and Δ Centrality, improved Y-Spacing. VIS-4 Bridge Analysis (Betweenness Centrality Bar Chart) implemented. Region-based color coding replaces Community Colors.)
+
+---
+
+**US-10: Method transparency & documentation**
+As a researcher, I want to view the data processing pipeline and calculation methods to understand the reproducibility and validity of the analyses.
+
+Acceptance Criteria:
+- Visual workflow of data processing (RDS → Python → JSON)
+- Definitions of all network metrics with formulas
+- Transparent presentation of data quality issues (Synthetic Data Warnings)
+- Access to complete project documentation (data.md, research.md, requirements.md)
+- Collapsible accordion for Markdown documents (Lazy Loading)
+
+Technology: Vanilla JavaScript (fetch API), Basic Markdown→HTML Parser (Regex-based, no dependencies)
+
+Status: Completed (Tab 4 "Data & Methodology" with 4 sections: Data Pipeline Flowchart, Network Metrics Definitions [4 Centrality formulas], Data Quality Warnings [Density 95.9%, Modularity 0.010, Synthetic Data Notice], Documentation Embed [Accordion UI with knowledge/*.md files]. Basic Markdown Parser supports Headers, Bold, Italic, Code Blocks, Links, Lists.)
+
+---
+
+## Prioritization
+
+| Priority | Stories | Justification |
+|----------|---------|---------------|
+| High | US-01, US-02, US-03 | Foundation for all further analyses |
+| High | US-05, US-08 | Core metrics and basic visualization |
+| Medium | US-06, US-07 | In-depth analyses |
+| Medium | US-09 | Temporal dimension |
+| Lower | US-04 | Firm level is computationally intensive, country level has priority |
+
+## Publication Workflow
+
+**Local Processing:**
+- Python scripts process `data/db_networkCoPat_fake.rds` (local, not in Git)
+- Calculated metrics, visualizations and results are saved in `docs/`
+- `docs/` contains only aggregated results, no raw data
 
 **GitHub Pages:**
-- `docs/` Ordner wird via GitHub Pages veröffentlicht
-- HTML-Visualisierungen (Plotly, PyVis) direkt im Browser nutzbar
-- Statische Plots (PNG, PDF) für Download
-- CSV-Exporte mit aggregierten Metriken
+- `docs/` folder is published via GitHub Pages
+- HTML visualizations (Plotly, PyVis) directly usable in browser
+- Static plots (PNG, PDF) for download
+- CSV exports with aggregated metrics
 
-**Datenschutz:**
-- Nur synthetische Daten im Repository
-- Echte Daten bleiben lokal, werden nie gepusht
-- `.gitignore` verhindert versehentliches Hochladen sensibler Daten
+**Data Privacy:**
+- Only synthetic data in repository
+- Real data remains local, never pushed
+- `.gitignore` prevents accidental upload of sensitive data
 
-## Offene Fragen
+## Open Questions
 
-- Welche Metriken sind für die Publikation am relevantesten?
-- Gibt es Präferenzen für Visualisierungsstile?
-- Soll die Firmenebene vollständig oder nur für ausgewählte Länder/Jahre analysiert werden?
-- GitHub Pages Design: Minimalistisch oder mit Framework (z.B. Jupyter Book, Sphinx)?
+- Which metrics are most relevant for publication?
+- Are there preferences for visualization styles?
+- Should the firm level be analyzed completely or only for selected countries/years?
+- GitHub Pages design: Minimalist or with framework (e.g., Jupyter Book, Sphinx)?
