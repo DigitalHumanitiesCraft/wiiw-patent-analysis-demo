@@ -40,7 +40,7 @@ The `knowledge/` folder contains the project's knowledge base.
 | `requirements.md` | User stories, acceptance criteria, technology stack |
 | `journal.md` | Process documentation, decisions, dead ends, insights |
 
-Before generating code, read the relevant documents in `knowledge/`. When implementation produces new insights, update the documentation. The documents are the source of truth, code is a disposable artifact.
+Before generating code, read the relevant documents in `knowledge/`. When implementation produces new insights, update the documentation. The documents are the source of truth, and the code is the maintained implementation of what they specify.
 
 ## Working Principles
 
@@ -54,4 +54,4 @@ Save scripts to `scripts/`, outputs to `docs/` for GitHub Pages publication.
 
 When uncertain about research context, consult `research.md` or ask.
 
-The documents are the source of truth. Code is a disposable artifact.
+The documents are the source of truth. Code is their maintained implementation and changes together with them.
