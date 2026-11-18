@@ -127,6 +127,17 @@ body {
     font-size: 0.9rem;
 }
 
+/* The page footer is the time slider, so the imprint line sits under the legend. */
+.site-imprint {
+    margin-top: var(--spacing-sm);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.site-imprint a {
+    color: inherit;
+}
+
 .legend-title {
     font-weight: 600;
     color: #495057;
